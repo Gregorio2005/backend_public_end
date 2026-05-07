@@ -487,6 +487,29 @@ src/
 │   └── ...          # Resto de las 28 tablas
 ├── app.js           # Configuración de Express
 └── server.js        # Punto de entrada
+
+## Guía de Archivos
+
+### Archivos de Raíz y Configuración
+*   **`server.js`**: Es el punto de entrada de la aplicación. Se encarga de verificar la conexión a la base de datos (usando `testConnection`) e iniciar el servidor en el puerto configurado.
+*   **`app.js`**: Centraliza la configuración de Express. Aquí se definen los middlewares globales (CORS, Morgan, JSON), se registran todas las rutas de los módulos y se configura el manejador de errores global.
+*   **`package.json`**: Gestiona las dependencias del proyecto (Sequelize, Express, JWT, etc.) y define los scripts de ejecución como `npm run dev`.
+*   **`.env.example`**: Archivo de plantilla que muestra las variables de entorno necesarias para que el sistema funcione (credenciales de DB, secretos de seguridad).
+*   **`src/config/db.js`**: Gestiona la conexión a PostgreSQL mediante Sequelize. Implementa la lógica para alternar entre la base de datos local y la de Neon, y exporta el pool de conexiones.
+*   **`src/config/envs.js`**: Se encarga de leer, centralizar y validar las variables del archivo `.env`, asignando valores por defecto cuando es necesario.
+
+### Middlewares (`src/middleware/`)
+*   **`auth.js`**: Protege las rutas privadas verificando la validez del token JWT enviado por el cliente.
+*   **`errorHandler.js`**: Captura cualquier error ocurrido en los controladores para enviar una respuesta JSON estandarizada y evitar que el servidor se detenga.
+*   **`validator.js`**: Facilita la validación de los datos de entrada (body, params) utilizando `express-validator`.
+
+### Estructura Modular (`src/modules/`)
+Para mantener el orden en las 29 tablas, cada una cuenta con tres archivos fundamentales:
+
+*   **`*_model.js`**: Define la estructura de la tabla y se encarga de realizar las consultas (Queries) a la base de datos.
+*   **`*_controller.js`**: Contiene la lógica de negocio. Recibe las peticiones del cliente, utiliza el modelo para obtener o guardar datos y devuelve la respuesta correspondiente (éxito o error).
+*   **`*_routes.js`**: Define los puntos de acceso (endpoints) de la API (GET, POST, PUT, DELETE) y asocia cada uno con su función en el controlador y sus respectivos middlewares de seguridad.
+
 ```
 
 ## Faltantes y Diferencias con la Propuesta de Estructura de Backend
