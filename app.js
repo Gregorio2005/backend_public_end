@@ -11,6 +11,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
+const authRoutes = require('./src/modules/auth/auth_routes');
 const rolesRoutes = require('./src/modules/roles/roles_routes');
 const usersRoutes = require('./src/modules/users/users_routes');
 const typeInputsRoutes = require('./src/modules/type_inputs/type_inputs_routes');
@@ -46,6 +47,7 @@ app.get('/', (req, res) => {
     res.json({ message: "API de Gestión de Insumos e Inspecciones funcionando" });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/type-inputs', typeInputsRoutes);
