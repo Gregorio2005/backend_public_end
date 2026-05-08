@@ -1,47 +1,44 @@
-const InputsChemicalsModel = require('./inputs_chemicals_model');
+const InputsChemicalsService = require('./inputs_chemicals_service');
 
 const InputsChemicalsController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsModel.findAll();
+            const data = await InputsChemicalsService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+    getOne: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsChemicalsService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+    create: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsModel.create(req.body);
+            const data = await InputsChemicalsService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+    update: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsChemicalsService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+    remove: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            await InputsChemicalsService.delete(req.params.id);
             res.json({ success: true, message: 'Registro eliminado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

@@ -1,47 +1,48 @@
-const InputsThermoplasticsModel = require('./inputs_thermoplastics_model');
+const InputsThermoplasticsService = require('./inputs_thermoplastics_service');
 
 const InputsThermoplasticsController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsModel.findAll();
+            const data = await InputsThermoplasticsService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsThermoplasticsService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsModel.create(req.body);
+            const data = await InputsThermoplasticsService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsThermoplasticsService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
-            res.json({ success: true, message: 'Registro eliminado correctamente' });
+            await InputsThermoplasticsService.delete(req.params.id);
+            res.json({ success: true, message: 'Insumo eliminado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

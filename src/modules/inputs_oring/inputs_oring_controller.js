@@ -1,47 +1,48 @@
-const InputsOringModel = require('./inputs_oring_model');
+const InputsOringService = require('./inputs_oring_service');
 
 const InputsOringController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InputsOringModel.findAll();
+            const data = await InputsOringService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InputsOringModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsOringService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InputsOringModel.create(req.body);
+            const data = await InputsOringService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InputsOringModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsOringService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InputsOringModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
-            res.json({ success: true, message: 'Registro eliminado correctamente' });
+            await InputsOringService.delete(req.params.id);
+            res.json({ success: true, message: 'Insumo Oring eliminado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

@@ -1,47 +1,48 @@
-const InspectionCamerasModel = require('./inspection_cameras_model');
+const InspectionCamerasService = require('./inspection_cameras_service');
 
 const InspectionCamerasController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasModel.findAll();
+            const data = await InspectionCamerasService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionCamerasService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasModel.create(req.body);
+            const data = await InspectionCamerasService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionCamerasService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            await InspectionCamerasService.delete(req.params.id);
             res.json({ success: true, message: 'Inspección eliminada correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

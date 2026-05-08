@@ -1,47 +1,48 @@
-const ReportsApprovedModel = require('./reports_approved_model');
+const ReportsApprovedService = require('./reports_approved_service');
 
 const ReportsApprovedController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await ReportsApprovedModel.findAll();
+            const data = await ReportsApprovedService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await ReportsApprovedModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Reporte no encontrado' });
+            const data = await ReportsApprovedService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await ReportsApprovedModel.create(req.body);
+            const data = await ReportsApprovedService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await ReportsApprovedModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Reporte no encontrado' });
+            const data = await ReportsApprovedService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await ReportsApprovedModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Reporte no encontrado' });
-            res.json({ success: true, message: 'Reporte eliminado correctamente' });
+            await ReportsApprovedService.delete(req.params.id);
+            res.json({ success: true, message: 'Reporte de aprobación eliminado' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

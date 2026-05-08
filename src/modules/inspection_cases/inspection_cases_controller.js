@@ -1,47 +1,48 @@
-const InspectionCasesModel = require('./inspection_cases_model');
+const InspectionCasesService = require('./inspection_cases_service');
 
 const InspectionCasesController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCasesModel.findAll();
+            const data = await InspectionCasesService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InspectionCasesModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionCasesService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InspectionCasesModel.create(req.body);
+            const data = await InspectionCasesService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InspectionCasesModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionCasesService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InspectionCasesModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            await InspectionCasesService.delete(req.params.id);
             res.json({ success: true, message: 'Inspección eliminada correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

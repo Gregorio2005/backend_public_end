@@ -2,30 +2,39 @@ const pool = require('../../config/db');
 
 const SuppliersModel = {
     findAll: async () => {
-        const { rows } = await pool.query('SELECT * FROM public.suppliers ORDER BY id ASC');
+        const query = 'SELECT * FROM public.suppliers ORDER BY id ASC';
+        const { rows } = await pool.query(query);
         return rows;
     },
+
     findById: async (id) => {
-        const { rows } = await pool.query('SELECT * FROM public.suppliers WHERE id = $1', [id]);
+        const query = 'SELECT * FROM public.suppliers WHERE id = $1';
+        const { rows } = await pool.query(query, [id]);
         return rows[0];
     },
-    create: async (supplierData) => {
-        const { user_id, name } = supplierData;
-        const { rows } = await pool.query(
-            'INSERT INTO public.suppliers (user_id, name) VALUES ($1, $2) RETURNING *',
-            [user_id, name]
-        );
+
+    create: async (data) => {
+        const { user_id, name } = data;
+        const query = 'INSERT INTO public.suppliers (user_id, name) VALUES ($1, $2) RETURNING *';
+        const { rows } = await pool.query(query, [user_id, name]);
         return rows[0];
     },
-    update: async (id, name) => {
-        const { rows } = await pool.query(
-            'UPDATE public.suppliers SET name = $1 WHERE id = $2 RETURNING *',
-            [name, id]
-        );
+
+    update: async (id, data) => {
+        const { user_id, name } = data;
+        const query = `
+            UPDATE public.suppliers 
+            SET user_id = $1, name = $2 
+            WHERE id = $3 
+            RETURNING *
+        `;
+        const { rows } = await pool.query(query, [user_id, name, id]);
         return rows[0];
     },
+
     delete: async (id) => {
-        const { rows } = await pool.query('DELETE FROM public.suppliers WHERE id = $1 RETURNING id', [id]);
+        const query = 'DELETE FROM public.suppliers WHERE id = $1 RETURNING id';
+        const { rows } = await pool.query(query, [id]);
         return rows[0];
     }
 };

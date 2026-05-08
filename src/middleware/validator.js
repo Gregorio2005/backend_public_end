@@ -1,14 +1,26 @@
-const { validationResult } = require('express-validator');
-
 /**
- * Verifica si hay errores de validación en la petición
+ * Middleware para validar los datos de entrada de la petición utilizando la librería Zod.
+ * 
+ * @param {import('zod').ZodSchema} schema - El esquema de Zod contra el cual se validará la petición.
+ * @returns {Function} Middleware de Express que valida body, query y params.
  */
-const validateRequest = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ success: false, errors: errors.array() });
+const validateRequest = (schema) => (req, res, next) => {
+    try {
+        schema.parse({
+            body: req.body,
+            query: req.query,
+            params: req.params,
+        });
+        next();
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            errors: error.errors.map(err => ({
+                field: err.path.join('.'),
+                message: err.message
+            }))
+        });
     }
-    next();
 };
 
 module.exports = { validateRequest };

@@ -1,47 +1,48 @@
-const InputsStuffingModel = require('./inputs_stuffing_stamps_downspouts_model');
+const InputsStuffingService = require('./inputs_stuffing_stamps_downspouts_service');
 
 const InputsStuffingController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InputsStuffingModel.findAll();
+            const data = await InputsStuffingService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InputsStuffingModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsStuffingService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InputsStuffingModel.create(req.body);
+            const data = await InputsStuffingService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InputsStuffingModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsStuffingService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InputsStuffingModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
-            res.json({ success: true, message: 'Registro eliminado correctamente' });
+            await InputsStuffingService.delete(req.params.id);
+            res.json({ success: true, message: 'Insumo eliminado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

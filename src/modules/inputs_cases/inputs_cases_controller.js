@@ -1,47 +1,48 @@
-const InputsCasesModel = require('./inputs_cases_model');
+const InputsCasesService = require('./inputs_cases_service');
 
 const InputsCasesController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InputsCasesModel.findAll();
+            const data = await InputsCasesService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InputsCasesModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsCasesService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InputsCasesModel.create(req.body);
+            const data = await InputsCasesService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InputsCasesModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
+            const data = await InputsCasesService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InputsCasesModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Registro no encontrado' });
-            res.json({ success: true, message: 'Registro eliminado correctamente' });
+            await InputsCasesService.delete(req.params.id);
+            res.json({ success: true, message: 'Insumo de estuche eliminado' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

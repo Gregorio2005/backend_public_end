@@ -1,47 +1,48 @@
-const InspectionStampsModel = require('./inspection_stamps_model');
+const InspectionStampsService = require('./inspection_stamps_service');
 
 const InspectionStampsController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InspectionStampsModel.findAll();
+            const data = await InspectionStampsService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InspectionStampsModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionStampsService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InspectionStampsModel.create(req.body);
+            const data = await InspectionStampsService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InspectionStampsModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionStampsService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InspectionStampsModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            await InspectionStampsService.delete(req.params.id);
             res.json({ success: true, message: 'Inspección eliminada correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

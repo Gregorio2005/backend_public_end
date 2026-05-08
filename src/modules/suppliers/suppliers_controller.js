@@ -1,47 +1,55 @@
-const SuppliersModel = require('./suppliers_model');
+const SuppliersService = require('./suppliers_service');
 
 const SuppliersController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await SuppliersModel.findAll();
-            res.json({ success: true, data });
+            const result = await SuppliersService.getAllSuppliers();
+            res.json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await SuppliersModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Proveedor no encontrado' });
-            res.json({ success: true, data });
+            const result = await SuppliersService.getSupplierById(req.params.id);
+            res.json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await SuppliersModel.create(req.body);
-            res.status(201).json({ success: true, data });
+            const result = await SuppliersService.createSupplier(req.body);
+            res.status(201).json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await SuppliersModel.update(req.params.id, req.body.name);
-            if (!data) return res.status(404).json({ success: false, message: 'Proveedor no encontrado' });
-            res.json({ success: true, data });
+            const result = await SuppliersService.updateSupplier(req.params.id, req.body);
+            res.json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await SuppliersModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Proveedor no encontrado' });
-            res.json({ success: true, message: 'Proveedor eliminado' });
+            await SuppliersService.deleteSupplier(req.params.id);
+            res.json({ success: true, message: 'Proveedor eliminado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            // Manejo de integridad referencial (Punto 5 de la ruta)
+            if (error.code === '23503') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'No se puede eliminar el proveedor porque tiene facturas (bill_data) asociadas' 
+                });
+            }
+            next(error);
         }
     }
 };

@@ -1,47 +1,48 @@
-const InspectionOringModel = require('./inspection_oring_model');
+const InspectionOringService = require('./inspection_oring_service');
 
 const InspectionOringController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await InspectionOringModel.findAll();
+            const data = await InspectionOringService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    getOne: async (req, res) => {
+
+    getOne: async (req, res, next) => {
         try {
-            const data = await InspectionOringModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionOringService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    create: async (req, res) => {
+
+    create: async (req, res, next) => {
         try {
-            const data = await InspectionOringModel.create(req.body);
+            const data = await InspectionOringService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    update: async (req, res) => {
+
+    update: async (req, res, next) => {
         try {
-            const data = await InspectionOringModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            const data = await InspectionOringService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
-    remove: async (req, res) => {
+
+    remove: async (req, res, next) => {
         try {
-            const data = await InspectionOringModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Inspección no encontrada' });
+            await InspectionOringService.delete(req.params.id);
             res.json({ success: true, message: 'Inspección eliminada correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

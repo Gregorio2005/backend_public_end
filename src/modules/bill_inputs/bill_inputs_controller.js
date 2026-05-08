@@ -1,63 +1,48 @@
-const BillInputsModel = require('./bill_inputs_model');
+const BillInputsService = require('./bill_inputs_service');
 
 const BillInputsController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const data = await BillInputsModel.findAll();
+            const data = await BillInputsService.getAll();
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    getOne: async (req, res) => {
+    getOne: async (req, res, next) => {
         try {
-            const data = await BillInputsModel.findById(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Renglón no encontrado' });
+            const data = await BillInputsService.getById(req.params.id);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    getByBill: async (req, res) => {
+    create: async (req, res, next) => {
         try {
-            const data = await BillInputsModel.findByBillId(req.params.billId);
-            res.json({ success: true, data });
-        } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
-        }
-    },
-
-    create: async (req, res) => {
-        try {
-            const data = await BillInputsModel.create(req.body);
+            const data = await BillInputsService.create(req.body);
             res.status(201).json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    update: async (req, res) => {
+    update: async (req, res, next) => {
         try {
-            const data = await BillInputsModel.update(req.params.id, req.body);
-            if (!data) return res.status(404).json({ success: false, message: 'Renglón no encontrado' });
+            const data = await BillInputsService.update(req.params.id, req.body);
             res.json({ success: true, data });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    remove: async (req, res) => {
+    remove: async (req, res, next) => {
         try {
-            const data = await BillInputsModel.delete(req.params.id);
-            if (!data) return res.status(404).json({ success: false, message: 'Renglón no encontrado' });
-            res.json({ success: true, message: 'Renglón de factura eliminado' });
+            await BillInputsService.delete(req.params.id);
+            res.json({ success: true, message: 'Insumo eliminado de la factura' });
         } catch (error) {
-            if (error.code === '23503') {
-                return res.status(400).json({ success: false, message: 'No se puede eliminar: el renglón ya tiene una inspección asociada' });
-            }
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };

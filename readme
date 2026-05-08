@@ -475,6 +475,14 @@ ALTER TABLE ONLY public.users
 - [x] Módulos de Insumos específicos (Completado).
 - [x] Módulos de Inspecciones (Completado).
 
+## Ruta de Trabajo (Pendientes para Evaluación)
+
+1.  **Migración técnica de Validación:** Reemplazar `express-validator` por la librería **Zod** en todos los middlewares.
+2.  **Estandarización de Arquitectura en Capas:** Desacoplar controladores de modelos mediante la creación de la capa de **Services** para todos los módulos.
+3.  **Gestión de Acceso (Auth):** Implementar el módulo de autenticación obligatorio (Login con JWT, Recuperación de contraseña y Perfil `/me`).
+4.  **Gestión de Usuarios:** Desarrollar el CRUD completo para la tabla `users` con encriptación de contraseñas.
+5.  **Lógica de Negocio Avanzada:** Implementar funciones en los servicios que vayan más allá del CRUD (interacción entre tablas e integridad de procesos).
+
 ## Arquitectura de Carpetas
 ```text
 src/
@@ -509,29 +517,3 @@ Para mantener el orden en las 29 tablas, cada una cuenta con tres archivos funda
 *   **`*_model.js`**: Define la estructura de la tabla y se encarga de realizar las consultas (Queries) a la base de datos.
 *   **`*_controller.js`**: Contiene la lógica de negocio. Recibe las peticiones del cliente, utiliza el modelo para obtener o guardar datos y devuelve la respuesta correspondiente (éxito o error).
 *   **`*_routes.js`**: Define los puntos de acceso (endpoints) de la API (GET, POST, PUT, DELETE) y asocia cada uno con su función en el controlador y sus respectivos middlewares de seguridad.
-
-```
-
-## Faltantes y Diferencias con la Propuesta de Estructura de Backend
-
-Basado en la propuesta de estructura y requisitos proporcionada, los siguientes puntos representan diferencias o funcionalidades aún no implementadas en el proyecto actual:
-
-1.  **Estructura de Carpetas Principal:**
-    *   La propuesta organiza `controllers/`, `routes/`, y `models/` como carpetas de primer nivel dentro de `src/`. El proyecto actual los agrupa por entidad dentro de `src/modules/<nombre_modulo>/`.
-    *   La propuesta incluye carpetas `services/` (para lógica de negocio que interactúa con servicios externos o encapsula lógica compleja) y `utils/` (para funciones de ayuda generales) que no existen en la estructura actual del proyecto.
-
-2.  **ORM/Cliente de Base de Datos:**
-    *   El proyecto actual utiliza el cliente `pg` directamente para interactuar con PostgreSQL. La propuesta menciona explícitamente el uso de `sequelize` para PostgreSQL, lo que implicaría un cambio en la capa de abstracción de la base de datos (de `pg` a `sequelize`).
-
-3.  **Manejo de Conexión a Base de Datos (Conmutación):**
-    *   La conmutación entre la base de datos local y remota se realiza actualmente comentando/descomentando código en `src/config/db.js`. La propuesta requiere que esta conmutación se gestione mediante una variable de entorno `DB_ENV` en el archivo `.env`.
-
-4.  **Función `testConnection()`:**
-    *   La propuesta solicita que el archivo de configuración de la base de datos (`src/config/db.js` en el proyecto actual) exporte una función `testConnection()` para verificar la conectividad de la base de datos al inicio de la aplicación, la cual no está implementada.
-
-5.  **Archivo `.env.example`:**
-    *   La propuesta requiere un archivo `.env.example` que sirva como plantilla para las variables de entorno, incluyendo `DB_ENV` y la `NEON_DB_URL` completa. Este archivo no existe actualmente en el proyecto.
-
-6.  **Validación de Entradas (Implementación Detallada):**
-    *   Aunque se ha creado el middleware `src/middleware/validator.js` para manejar los resultados de la validación, la implementación de las reglas de validación específicas para cada campo de entrada utilizando `express-validator` en las rutas o controladores aún no se ha mostrado o aplicado de forma generalizada en todos los endpoints.
-```

@@ -2,34 +2,39 @@ const pool = require('../../config/db');
 
 const ReportsRefusedModel = {
     findAll: async () => {
-        const { rows } = await pool.query('SELECT * FROM public.reports_refused ORDER BY id ASC');
+        const query = 'SELECT * FROM public.reports_refused ORDER BY id ASC';
+        const { rows } = await pool.query(query);
         return rows;
     },
+
     findById: async (id) => {
-        const { rows } = await pool.query('SELECT * FROM public.reports_refused WHERE id = $1', [id]);
+        const query = 'SELECT * FROM public.reports_refused WHERE id = $1';
+        const { rows } = await pool.query(query, [id]);
         return rows[0];
     },
+
     create: async (data) => {
         const { bill_data_id, claim_date, claim_quantity, rejection_reason } = data;
         const query = `
-            INSERT INTO public.reports_refused (bill_data_id, claim_date, claim_quantity, rejection_reason)
+            INSERT INTO public.reports_refused (bill_data_id, claim_date, claim_quantity, rejection_reason) 
             VALUES ($1, $2, $3, $4) RETURNING *`;
-        const values = [bill_data_id, claim_date, claim_quantity, rejection_reason];
-        const { rows } = await pool.query(query, values);
+        const { rows } = await pool.query(query, [bill_data_id, claim_date, claim_quantity, rejection_reason]);
         return rows[0];
     },
+
     update: async (id, data) => {
-        const { claim_date, claim_quantity, rejection_reason } = data;
+        const { bill_data_id, claim_date, claim_quantity, rejection_reason } = data;
         const query = `
             UPDATE public.reports_refused 
-            SET claim_date = $1, claim_quantity = $2, rejection_reason = $3
-            WHERE id = $4 RETURNING *`;
-        const values = [claim_date, claim_quantity, rejection_reason, id];
-        const { rows } = await pool.query(query, values);
+            SET bill_data_id = $1, claim_date = $2, claim_quantity = $3, rejection_reason = $4 
+            WHERE id = $5 RETURNING *`;
+        const { rows } = await pool.query(query, [bill_data_id, claim_date, claim_quantity, rejection_reason, id]);
         return rows[0];
     },
+
     delete: async (id) => {
-        const { rows } = await pool.query('DELETE FROM public.reports_refused WHERE id = $1 RETURNING id', [id]);
+        const query = 'DELETE FROM public.reports_refused WHERE id = $1 RETURNING id';
+        const { rows } = await pool.query(query, [id]);
         return rows[0];
     }
 };

@@ -1,62 +1,48 @@
-const UsersModel = require('./users_model');
-const bcrypt = require('bcryptjs');
+const UsersService = require('./users_service');
 
 const UsersController = {
-    getAll: async (req, res) => {
+    getAll: async (req, res, next) => {
         try {
-            const users = await UsersModel.findAll();
+            const users = await UsersService.getAllUsers();
             res.json({ success: true, data: users });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    getOne: async (req, res) => {
+    getOne: async (req, res, next) => {
         try {
-            const user = await UsersModel.findById(req.params.id);
-            if (!user) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            const user = await UsersService.getUserById(req.params.id);
             res.json({ success: true, data: user });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    create: async (req, res) => {
+    create: async (req, res, next) => {
         try {
-            const { password, ...otherData } = req.body;
-            
-            // Encriptar contraseña
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            
-            const newUser = await UsersModel.create({
-                ...otherData,
-                password: hashedPassword
-            });
-            
-            res.status(201).json({ success: true, data: newUser });
+            const result = await UsersService.createUser(req.body);
+            res.status(201).json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    update: async (req, res) => {
+    update: async (req, res, next) => {
         try {
-            const updatedUser = await UsersModel.update(req.params.id, req.body);
-            if (!updatedUser) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-            res.json({ success: true, data: updatedUser });
+            const result = await UsersService.updateUser(req.params.id, req.body);
+            res.json({ success: true, data: result });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     },
 
-    remove: async (req, res) => {
+    remove: async (req, res, next) => {
         try {
-            const deleted = await UsersModel.delete(req.params.id);
-            if (!deleted) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            await UsersService.deleteUser(req.params.id);
             res.json({ success: true, message: 'Usuario desactivado correctamente' });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            next(error);
         }
     }
 };
