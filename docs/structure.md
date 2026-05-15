@@ -25,12 +25,12 @@ Contiene la lógica de configuración global.
 
 ### `/middleware`
 Funciones intermedias que procesan las peticiones antes de llegar a los controladores.
-- `auth.js`: Verificación de identidad mediante JSON Web Tokens.
+- `auth.js`: Middleware `verifyToken` para la validación de identidad mediante JSON Web Tokens.
 - `errorHandler.js`: Captura centralizada de excepciones y respuestas de error.
 - `validator.js`: Middleware para ejecutar validaciones de Zod.
 
 ### `/auth`
-- `auth.js`: Lógica específica de autenticación, controladores y rutas de acceso.
+- `auth.js`: Controladores y rutas de acceso. Implementa **bcrypt** para el hashing de credenciales.
 
 ### `/modules`
 Esta es la carpeta más importante. El sistema está dividido en **módulos independientes** por cada entidad de la base de datos (más de 29 tablas). Cada módulo contiene sus propias capas:

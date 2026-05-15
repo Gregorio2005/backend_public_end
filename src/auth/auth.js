@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/envs');
+const AuthController = require('./auth.controller');
 
 const router = express.Router();
 
@@ -32,7 +33,10 @@ const verifyToken = (req, res, next) => {
 };
 
 // Aquí se definirán las rutas del módulo auth utilizando los nuevos nombres de endpoints
-// Ejemplo: router.post('/login', loginController);
+router.post('/register', AuthController.register);
+router.post('/login', AuthController.login);
+router.get('/me', verifyToken, AuthController.getMe);
+router.post('/forgot-password', AuthController.forgotPassword);
 
 module.exports = { 
     verifyToken,

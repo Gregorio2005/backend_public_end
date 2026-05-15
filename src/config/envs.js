@@ -16,7 +16,9 @@ const envSchema = z.object({
     DB_PORT: z.string().default('5432').transform(Number),
     NEON_DB_URL: z.string().optional(),
     JWT_SECRET: z.string().default('fallback_secret_no_usar_en_produccion'),
+    TOKEN_EXPIRY: z.string().default('24h'),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    DB_MODE: z.enum(['postgresql', 'neon']).default('postgresql'),
     // Definición de nombres para el sistema de enrutamiento global
     API_PREFIX: z.string().default('/api'),
     PROJECT_NAME: z.string().default('Gestión de Insumos API')
@@ -30,6 +32,11 @@ if (!result.success) {
 }
 
 const env = result.data;
+
+// Debug temporal: Borra esto después de verificar
+if (env.NODE_ENV === 'development') {
+    console.log('🔍 DEBUG ENV: DB_MODE actual es ->', env.DB_MODE);
+}
 
 module.exports = {
     ...env,

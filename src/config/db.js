@@ -1,26 +1,29 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const { DB, NEON_DB_URL, NODE_ENV, DB_MODE } = require('./envs');
 
-// ============================================================================
-// CONFIGURACIÓN DE CONEXIÓN
-// ============================================================================
+// Selector manual basado en DB_MODE (neon o postgresql)
+const isNeon = DB_MODE === 'neon';
 
-// --- OPCIÓN 1: SERVIDOR LOCAL ---
-/*
-const dbConfig = {
-    user: process.env.DB_USER || 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    database: process.env.DB_NAME || 'sealing_products_sa',
-    password: process.env.DB_PASSWORD || 'Oficial1.com',
-    port: process.env.DB_PORT || 5432,
-};*/
-
-// --- OPCIÓN 2: SERVIDOR EN LA NUBE (NEON) ---
-
-const dbConfig = {
-    connectionString: 'postgresql://neondb_owner:npg_otaHCG8I2WPT@ep-calm-voice-ap4zb4d3-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require',
-};
+const dbConfig = isNeon 
+    ? { 
+        connectionString: NEON_DB_URL, 
+        ssl: { 
+            rejectUnauthorized: false,
+            // Esto silencia la advertencia preparando el código para pg v9
+            sslmode: 'verify-full' 
+        } 
+      }
+    : DB;
 
 const pool = new Pool(dbConfig);
+
+pool.on('connect', () => {
+    if (NODE_ENV === 'development') {
+        const mode = isNeon ? '☁️  NEON (Cloud)' : '💻 LOCAL';
+        console.log(`✅ Conectado a PostgreSQL en modo: ${mode}`);
+    }
+});
+
+pool.on('error', (err) => console.error('❌ Error inesperado en el pool de conexión:', err));
 
 module.exports = pool;
