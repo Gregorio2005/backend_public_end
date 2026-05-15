@@ -6,11 +6,18 @@
  */
 const validateRequest = (schema) => (req, res, next) => {
     try {
-        schema.parse({
+        // Validamos y extraemos los datos (Zod aplica transformaciones y valores por defecto aquí)
+        const validatedData = schema.parse({
             body: req.body,
             query: req.query,
             params: req.params,
         });
+
+        // Reasignamos los datos validados a la petición para que el controlador reciba tipos correctos
+        if (validatedData.body) req.body = validatedData.body;
+        if (validatedData.query) req.query = validatedData.query;
+        if (validatedData.params) req.params = validatedData.params;
+
         next();
     } catch (error) {
         return res.status(400).json({

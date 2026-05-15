@@ -1,19 +1,43 @@
 const dotenv = require('dotenv');
+const { z } = require('zod');
+
 dotenv.config();
 
 /**
- * Centralización de variables de entorno con valores por defecto.
+ * Centralización y validación de variables de entorno mediante Zod.
+ * Se incorporan constantes para estandarizar el enrutamiento y la identidad del proyecto.
  */
+const envSchema = z.object({
+    PORT: z.string().default('3000').transform(Number),
+    DB_USER: z.string().default('postgres'),
+    DB_HOST: z.string().default('localhost'),
+    DB_DATABASE: z.string().optional(),
+    DB_PASSWORD: z.string().optional(),
+    DB_PORT: z.string().default('5432').transform(Number),
+    NEON_DB_URL: z.string().optional(),
+    JWT_SECRET: z.string().default('fallback_secret_no_usar_en_produccion'),
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+    // Definición de nombres para el sistema de enrutamiento global
+    API_PREFIX: z.string().default('/api'),
+    PROJECT_NAME: z.string().default('Gestión de Insumos API')
+});
+
+const result = envSchema.safeParse(process.env);
+
+if (!result.success) {
+    console.error('❌ Error de configuración (Variables de Entorno):', result.error.format());
+    process.exit(1);
+}
+
+const env = result.data;
+
 module.exports = {
-    PORT: process.env.PORT || 3000,
+    ...env,
     DB: {
-        user: process.env.DB_USER || 'postgres',
-        host: process.env.DB_HOST || 'localhost',
-        database: process.env.DB_DATABASE,
-        password: process.env.DB_PASSWORD,
-        port: parseInt(process.env.DB_PORT || '5432', 10),
-    },
-    NEON_DB_URL: process.env.NEON_DB_URL, // Nueva variable para la conexión en la nube
-    JWT_SECRET: process.env.JWT_SECRET || 'fallback_secret_no_usar_en_produccion',
-    NODE_ENV: process.env.NODE_ENV || 'development'
+        user: env.DB_USER,
+        host: env.DB_HOST,
+        database: env.DB_DATABASE,
+        password: env.DB_PASSWORD,
+        port: env.DB_PORT,
+    }
 };
