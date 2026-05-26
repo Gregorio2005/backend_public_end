@@ -21,7 +21,12 @@ const envSchema = z.object({
     DB_MODE: z.enum(['postgresql', 'neon']).default('postgresql'),
     // Definición de nombres para el sistema de enrutamiento global
     API_PREFIX: z.string().default('/api'),
-    PROJECT_NAME: z.string().default('Gestión de Insumos API')
+    PROJECT_NAME: z.string().default('Gestión de Insumos API'),
+    // Configuración de Servidor de Correo (Nodemailer)
+    SMTP_HOST: z.string().min(1, "El host SMTP es obligatorio"),
+    SMTP_PORT: z.string().default('587').transform(Number),
+    SMTP_USER: z.string().min(1, "El usuario SMTP es obligatorio"),
+    SMTP_PASS: z.string().min(1, "La contraseña SMTP es obligatoria")
 });
 
 const result = envSchema.safeParse(process.env);

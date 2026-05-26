@@ -1,6 +1,8 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
 const { createToken } = require('./jwt_utils');
+const { sendEmail } = require('../utils/mailer');
 
 const AuthController = {
     /**
@@ -104,14 +106,56 @@ const AuthController = {
     },
 
     /**
-     * Placeholder para la lógica de recuperación de contraseña.
+     * Maneja la recuperación de contraseña.
+     * Genera una nueva clave, la encripta en DB y la envía por correo.
      */
     forgotPassword: async (req, res, next) => {
         try {
             const { email } = req.body;
+
+            // 1. Validar si el correo existe en el sistema
+            const userCheck = await pool.query(
+                'SELECT id, name, "user" FROM public.users WHERE email = $1',
+                [email]
+            );
+
+            if (userCheck.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'El correo electrónico no se encuentra registrado en nuestro sistema.'
+                });
+            }
+
+            const user = userCheck.rows[0];
+
+            // 2. Crear nueva contraseña temporal (8 caracteres aleatorios)
+            const tempPassword = crypto.randomBytes(4).toString('hex');
+
+            // 3. Encriptar la nueva contraseña
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+            // 4. Actualizar en la base de datos
+            await pool.query(
+                'UPDATE public.users SET password = $1 WHERE id = $2',
+                [hashedPassword, user.id]
+            );
+
+            // 5. Enviar el correo con la contraseña en texto plano
+            await sendEmail({
+                to: email,
+                subject: 'Recuperación de Contraseña - Gestión de Insumos',
+                html: `
+                    <h1>Hola, ${user.name}</h1>
+                    <p>Has solicitado restablecer tu contraseña para el usuario <strong>${user.user}</strong>.</p>
+                    <p>Tu nueva contraseña temporal es: <strong>${tempPassword}</strong></p>
+                    <p>Por seguridad, te recomendamos cambiarla una vez que hayas iniciado sesión.</p>
+                `
+            });
+
             res.json({ 
                 success: true, 
-                message: `Si el correo ${email} existe en nuestro sistema, recibirá instrucciones de recuperación.`
+                message: `Se ha enviado una nueva contraseña al correo: ${email}`
             });
         } catch (error) {
             next(error);

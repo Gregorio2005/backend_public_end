@@ -11,7 +11,7 @@ router.post('/login', validateRequest(loginSchema), AuthController.login);
 // Endpoint protegido para obtener el perfil del usuario actual
 router.get('/me', verifyToken, AuthController.getMe);
 
-// Endpoint para recuperación de contraseña (placeholder)
-router.post('/forgot-password', validateRequest(forgotPasswordSchema), AuthController.forgotPassword);
+// Endpoint para recuperación de contraseña
+router.post('/forgot_password', validateRequest(forgotPasswordSchema), AuthController.forgotPassword);
 
 module.exports = router;

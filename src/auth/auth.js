@@ -36,7 +36,7 @@ const verifyToken = (req, res, next) => {
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.get('/me', verifyToken, AuthController.getMe);
-router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/forgot_password', AuthController.forgotPassword);
 
 module.exports = { 
     verifyToken,
