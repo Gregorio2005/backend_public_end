@@ -68,6 +68,13 @@ DB_DATABASE=sealing_products_sa
 DB_PASSWORD=Oficial1.com
 
 NEON_DB_URL=postgresql://neondb_owner:npg_otaHCG8I2WPT@ep-calm-voice-ap4zb4d3-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+# Configuración de Correo (Gmail)
+# Nota: Para GMAIL_PASS, utiliza una "Contraseña de Aplicación", no tu contraseña personal.
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=tu-correo@gmail.com
+SMTP_PASS=tu-clave-de-16-caracteres
 ```
 
 ---

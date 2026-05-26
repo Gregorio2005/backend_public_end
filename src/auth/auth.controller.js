@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
@@ -112,10 +114,14 @@ const AuthController = {
     forgotPassword: async (req, res, next) => {
         try {
             const { email } = req.body;
+            
+            if (!email) {
+                return res.status(400).json({ success: false, message: 'El correo es requerido.' });
+            }
 
             // 1. Validar si el correo existe en el sistema
             const userCheck = await pool.query(
-                'SELECT id, name, "user" FROM public.users WHERE email = $1',
+                'SELECT id, name, "user", email FROM public.users WHERE email = $1',
                 [email]
             );
 
@@ -141,16 +147,59 @@ const AuthController = {
                 [hashedPassword, user.id]
             );
 
+            // Ruta a tu imagen local
+            const logoPath = path.join(__dirname, '../assets/logo_empresa.jpeg');
+            
+            // Verificar si la imagen existe para no romper el envío
+            const hasLogo = fs.existsSync(logoPath);
+
             // 5. Enviar el correo con la contraseña en texto plano
             await sendEmail({
-                to: email,
-                subject: 'Recuperación de Contraseña - Gestión de Insumos',
+                to: user.email,
+                subject: `Recuperación de Contraseña - ${user.name}`,
                 html: `
-                    <h1>Hola, ${user.name}</h1>
-                    <p>Has solicitado restablecer tu contraseña para el usuario <strong>${user.user}</strong>.</p>
-                    <p>Tu nueva contraseña temporal es: <strong>${tempPassword}</strong></p>
-                    <p>Por seguridad, te recomendamos cambiarla una vez que hayas iniciado sesión.</p>
-                `
+                    <div style="background-color: #dcdcdc; padding: 40px 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            <!-- Header con Color Corporativo -->
+                            <div style="background-color: #2c3e50; padding: 20px; text-align: center;">
+                                ${hasLogo ? '<img src="cid:logo_empresa" alt="Logo" style="max-height: 80px; width: auto;">' : '<h1 style="color: #ffffff; margin: 0; font-size: 20px;">Sealing Products C.A.</h1>'}
+                            </div>
+                            
+                            <!-- Cuerpo del Mensaje -->
+                            <div style="padding: 30px; line-height: 1.6; color: #444;">
+                                <h2 style="color: #2c3e50; margin-top: 0;">Hola, ${user.name}</h2>
+                                <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta de usuario: <strong>${user.user}</strong>.</p>
+                                
+                                <div style="background-color: #f9f9f9; border-left: 4px solid #2c3e50; padding: 15px; margin: 25px 0; text-align: center;">
+                                    <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #777;">Tu nueva contraseña temporal</p>
+                                    <p style="margin: 10px 0 0; font-size: 28px; font-weight: bold; color: #2c3e50; letter-spacing: 2px;">${tempPassword}</p>
+                                </div>
+
+                                <p>Por favor, utiliza esta clave para iniciar sesión y asegúrate de <strong>cambiarla inmediatamente</strong> desde la configuración de tu perfil por razones de seguridad.</p>
+                                
+                                <div style="text-align: center; margin-top: 30px;">
+                                    <p style="font-size: 13px; color: #888;">Este es un mensaje automático, por favor no respondas a este correo.</p>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="background-color: #f1f1f1; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                                <p style="margin: 0; font-size: 12px; color: #999;">
+                                    &copy; ${new Date().getFullYear()} Sealing Products C.A. <br>
+                                    Departamento de Tecnología y Sistemas.
+                                    <span style="display:none !important; font-size:1px; color:#f1f1f1; line-height:1px;">ID: ${Date.now()}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                attachments: hasLogo ? [
+                    {
+                        filename: 'logo_empresa.jpeg',
+                        path: logoPath,
+                        cid: 'logo_empresa' // Este ID debe coincidir con el src="cid:..." del HTML
+                    }
+                ] : []
             });
 
             res.json({ 

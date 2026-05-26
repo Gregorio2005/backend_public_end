@@ -49,6 +49,9 @@ npm install zod
 # Seguridad y Autenticación
 npm install bcryptjs jsonwebtoken
 
+# Envío de correos
+npm install nodemailer
+
 # Herramientas de Desarrollo (Auto-restart)
 npm install -D nodemon
 ```

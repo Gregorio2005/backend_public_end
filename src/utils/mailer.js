@@ -21,27 +21,31 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.to - Dirección del destinatario.
  * @param {string} options.subject - Asunto del mensaje.
  * @param {string} options.html - Cuerpo del mensaje en formato HTML.
+ * @param {Array} [options.attachments] - Archivos adjuntos opcionales.
  */
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, attachments }) => {
     try {
         const info = await transporter.sendMail({
             from: `"${PROJECT_NAME}" <${SMTP_USER}>`,
             to,
             subject,
             html,
+            attachments
         });
 
         console.log("📧 Correo enviado con ID: %s", info.messageId);
         
-        // Si estamos usando Ethereal, genera una URL para previsualizar el correo en consola
-        if (SMTP_HOST.includes('ethereal')) {
-            console.log("🔗 Previsualización del correo: %s", nodemailer.getTestMessageUrl(info));
+        // Debug para verificar destinatario real
+        if (process.env.NODE_ENV === 'development') {
+            console.log("📬 Destinatario:", to);
+            console.log("🔑 Usando cuenta:", SMTP_USER);
         }
 
         return info;
     } catch (error) {
-        console.error("❌ Error en el servicio de correo:", error);
-        throw new Error("No se pudo enviar el correo electrónico.");
+        console.error("❌ Error en el servicio de correo detalle:", error.message);
+        console.error("🔍 Código de error SMTP:", error.code);
+        throw new Error(`No se pudo enviar el correo: ${error.message}`);
     }
 };
 
