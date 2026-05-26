@@ -21,6 +21,26 @@ Se han implementado nuevos endpoints en el backend y componentes en el frontend 
     - `200 OK`: Devuelve `{ "token": "JWT_STRING", "user": { "id": "uuid", "email": "str" } }`.
     - `401 Unauthorized`: Credenciales incorrectas.
 
+#### GET `/api/auth/profile`
+- **Seguridad**: Requiere Token Bearer.
+- **Descripción**: Retorna la información completa del usuario (User, Name, Lastname, CI, Email, Status) realizando un `JOIN` con la tabla de roles para devolver el nombre del rol en lugar del ID.
+
+#### PUT `/api/auth/profile_update`
+- **Seguridad**: Requiere Token Bearer.
+- **Body (JSON)**: `{ "user": "opt", "password": "opt", "email": "opt" }`
+- **Reglas de Negocio**: 
+    - Solo permite modificar el nombre de usuario, la contraseña y el correo.
+    - Valida que el nuevo `user` o `email` no pertenezcan a otro usuario registrado.
+    - Si se envía `password`, se encripta nuevamente con Bcrypt.
+
+#### POST `/api/auth/forgot_password`
+- **Body (JSON)**: `{ "email": "str" }`
+- **Descripción**: Flujo de recuperación automática.
+    1. Valida la existencia del correo.
+    2. Genera una clave temporal aleatoria de 8 caracteres (hex).
+    3. Actualiza el hash en la DB.
+    4. Envía un correo electrónico corporativo con la nueva clave y el logo de la empresa adjunto.
+
 #### Seguridad y Middleware
 - **Hashing**: Se utiliza **bcrypt** para el cifrado de contraseñas con un factor de costo (salt) configurado.
 - **Protección de Rutas**: Se implementó el middleware `verifyToken` para interceptar peticiones a rutas protegidas y validar la firma del JWT.

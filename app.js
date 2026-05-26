@@ -12,7 +12,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-const { authRouter } = require('./src/auth/auth');
+const authRouter = require('./src/auth/auth.routes');
 const rolesRoutes = require('./src/modules/roles/roles.routes');
 const usersRoutes = require('./src/modules/users/users.routes');
 const typeInputsRoutes = require('./src/modules/type_inputs/type_inputs.routes');
@@ -48,6 +48,7 @@ app.get('/', (req, res) => {
     res.json({ message: "API de Gestión de Insumos e Inspecciones funcionando" });
 });
 
+// Montaje de rutas: API_PREFIX (/api) + /auth
 app.use(`${API_PREFIX}/auth`, authRouter);
 app.use(`${API_PREFIX}/roles`, rolesRoutes);
 app.use(`${API_PREFIX}/users`, usersRoutes);

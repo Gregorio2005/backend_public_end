@@ -7,7 +7,7 @@ const { JWT_SECRET } = require('../config/envs');
  * @returns {string} Token firmado válido por 8 horas.
  */
 const createToken = (payload) => {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '8h' });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
 };
 
 module.exports = { createToken };

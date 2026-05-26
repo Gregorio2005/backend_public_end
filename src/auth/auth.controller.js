@@ -14,6 +14,19 @@ const AuthController = {
         try {
             const { user, password, name, lastname, ci, email, roles_id, status } = req.body;
 
+            // Validar unicidad de usuario y correo de forma explícita
+            const existingUser = await pool.query(
+                'SELECT "user", email FROM public.users WHERE "user" = $1 OR email = $2',
+                [user, email]
+            );
+
+            if (existingUser.rows.length > 0) {
+                const conflict = existingUser.rows[0];
+                const isUserConflict = conflict.user === user;
+                const message = isUserConflict ? 'El nombre de usuario ya está en uso' : 'El correo electrónico ya está registrado';
+                return res.status(400).json({ success: false, message });
+            }
+
             // Encriptar contraseña
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
@@ -102,6 +115,157 @@ const AuthController = {
             }
 
             res.json({ success: true, data: result.rows[0] });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
+     * @swagger
+     * /api/auth/profile:
+     *   get:
+     *     summary: Obtener perfil completo del usuario
+     *     description: Retorna los datos del usuario en sesión, incluyendo el nombre del rol.
+     *     tags: [Auth]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Datos obtenidos con éxito.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success: { type: boolean }
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     user: { type: string }
+     *                     name: { type: string }
+     *                     lastname: { type: string }
+     *                     ci: { type: string }
+     *                     email: { type: string }
+     *                     role: { type: string }
+     *                     status: { type: string }
+     *       401:
+     *         description: Token no proporcionado o inválido.
+     *       404:
+     *         description: Usuario no encontrado.
+     */
+    /**
+     * Obtiene el perfil del usuario actual con JOIN para el rol.
+     */
+    getProfile: async (req, res, next) => {
+        try {
+            const result = await pool.query(
+                `SELECT u."user", u.name, u.lastname, u.ci, u.email, r.name as role, u.status 
+                 FROM public.users u
+                 JOIN public.roles r ON u.roles_id = r.id
+                 WHERE u.id = $1`,
+                [req.user.id]
+            );
+            
+            if (result.rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            }
+
+            res.json({ success: true, data: result.rows[0] });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
+     * @swagger
+     * /api/auth/profile_update:
+     *   put:
+     *     summary: Actualizar perfil de usuario
+     *     description: Permite al usuario en sesión modificar su nombre de usuario, contraseña y correo electrónico.
+     *     tags: [Auth]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               user: { type: string, example: "nuevo_usuario" }
+     *               password: { type: string, example: "nueva_clave123" }
+     *               email: { type: string, example: "nuevo@correo.com" }
+     *     responses:
+     *       200:
+     *         description: Perfil actualizado correctamente.
+     *       400:
+     *         description: Error de validación o duplicidad de datos.
+     *       401:
+     *         description: No autorizado.
+     */
+    /**
+     * Actualiza datos permitidos (user, password, email) del usuario en sesión.
+     */
+    updateProfile: async (req, res, next) => {
+        try {
+            const { user, password, email } = req.body;
+            const userId = req.user.id;
+
+            // Validar unicidad si se intenta cambiar usuario o email
+            if (user || email) {
+                const checkConflict = await pool.query(
+                    'SELECT "user", email FROM public.users WHERE ("user" = $1 OR email = $2) AND id != $3',
+                    [user || null, email || null, userId]
+                );
+
+                if (checkConflict.rows.length > 0) {
+                    const conflict = checkConflict.rows[0];
+                    const isUserConflict = user && conflict.user === user;
+                    const message = isUserConflict ? 'El nombre de usuario ya está ocupado' : 'El correo electrónico ya está registrado por otro usuario';
+                    return res.status(400).json({ success: false, message });
+                }
+            }
+
+            const updates = [];
+            const values = [];
+            let index = 1;
+
+            if (user) {
+                updates.push(`"user" = $${index++}`);
+                values.push(user);
+            }
+
+            if (password) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                updates.push(`password = $${index++}`);
+                values.push(hashedPassword);
+            }
+
+            if (email) {
+                updates.push(`email = $${index++}`);
+                values.push(email);
+            }
+
+            if (updates.length === 0) {
+                return res.status(400).json({ success: false, message: 'No se enviaron campos para actualizar' });
+            }
+
+            values.push(userId);
+            const query = `
+                UPDATE public.users 
+                SET ${updates.join(', ')}, update_at = CURRENT_DATE 
+                WHERE id = $${index} 
+                RETURNING id, "user", email
+            `;
+
+            const result = await pool.query(query, values);
+
+            res.json({
+                success: true,
+                message: 'Perfil actualizado con éxito',
+                data: result.rows[0]
+            });
         } catch (error) {
             next(error);
         }

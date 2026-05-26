@@ -49,6 +49,9 @@ npm install zod
 # Seguridad y Autenticación
 npm install bcryptjs jsonwebtoken
 
+# Documentación de API (Swagger)
+npm install swagger-ui-express swagger-jsdoc
+
 # Envío de correos
 npm install nodemailer
 
