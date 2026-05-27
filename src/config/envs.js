@@ -15,7 +15,7 @@ const envSchema = z.object({
     DB_PASSWORD: z.string().optional(),
     DB_PORT: z.string().default('5432').transform(Number),
     NEON_DB_URL: z.string().optional(),
-    JWT_SECRET: z.string().default('fallback_secret_no_usar_en_produccion'),
+    JWT_SECRET: z.string().min(10, "El JWT_SECRET debe ser una cadena segura y es obligatorio"),
     TOKEN_EXPIRY: z.string().default('24h'),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     DB_MODE: z.enum(['postgresql', 'neon']).default('postgresql'),

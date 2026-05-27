@@ -32,14 +32,31 @@ const UsersModel = {
     },
 
     update: async (id, userData) => {
-        const { name, lastname, email, roles_id, status } = userData;
+        const { user, name, lastname, ci, email, roles_id, status } = userData;
         const query = `
             UPDATE public.users 
-            SET name = $1, lastname = $2, email = $3, roles_id = $4, status = $5
-            WHERE id = $6
-            RETURNING id, "user", name;
+            SET "user" = COALESCE($1, "user"), 
+                name = COALESCE($2, name), 
+                lastname = COALESCE($3, lastname), 
+                ci = COALESCE($4, ci), 
+                email = COALESCE($5, email), 
+                roles_id = COALESCE($6, roles_id), 
+                status = COALESCE($7, status),
+                update_at = CURRENT_DATE
+            WHERE id = $8
+            RETURNING id, "user", name, lastname, ci, email, roles_id, status;
         `;
-        const { rows } = await pool.query(query, [name, lastname, email, roles_id, status, id]);
+        const values = [
+            user !== undefined ? user : null,
+            name !== undefined ? name : null,
+            lastname !== undefined ? lastname : null,
+            ci !== undefined ? ci : null,
+            email !== undefined ? email : null,
+            roles_id !== undefined ? roles_id : null,
+            status !== undefined ? status : null,
+            id
+        ];
+        const { rows } = await pool.query(query, values);
         return rows[0];
     },
 

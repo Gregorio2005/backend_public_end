@@ -20,12 +20,16 @@ const validateRequest = (schema) => (req, res, next) => {
 
         next();
     } catch (error) {
+        // CRÍTICO: Protección con encadenamiento opcional y coalescencia nula
+        // Si error.errors no existe, se devuelve un array con un error genérico.
+        const formattedErrors = error?.errors?.map(err => ({
+            field: err.path?.join('.') || 'unknown',
+            message: err.message || 'Error de validación inesperado'
+        })) || [{ field: 'request', message: 'La estructura de la petición es inválida o está vacía' }];
+
         return res.status(400).json({
             success: false,
-            errors: error.errors.map(err => ({
-                field: err.path.join('.'),
-                message: err.message
-            }))
+            errors: formattedErrors
         });
     }
 };

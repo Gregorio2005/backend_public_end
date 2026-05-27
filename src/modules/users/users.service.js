@@ -1,5 +1,6 @@
 const UsersModel = require('./users.model');
 const bcrypt = require('bcryptjs');
+const pool = require('../../config/db');
 
 const UsersService = {
     getAllUsers: async () => {
@@ -28,10 +29,21 @@ const UsersService = {
     },
 
     updateUser: async (id, userData) => {
-        // Si intentan actualizar la contraseña por aquí, lo evitamos o manejamos aparte
-        if (userData.password) {
-            const salt = await bcrypt.genSalt(10);
-            userData.password = await bcrypt.hash(userData.password, salt);
+        const { user, email } = userData;
+
+        // 1. Validar unicidad si se intenta cambiar username o email
+        if (user || email) {
+            const checkConflict = await pool.query(
+                'SELECT "user", email FROM public.users WHERE ("user" = $1 OR email = $2) AND id != $3',
+                [user || null, email || null, id]
+            );
+
+            if (checkConflict.rows.length > 0) {
+                const conflict = checkConflict.rows[0];
+                const isUserConflict = user && conflict.user === user;
+                const message = isUserConflict ? 'El nombre de usuario ya está ocupado' : 'El correo electrónico ya está registrado por otro usuario';
+                throw new Error(message);
+            }
         }
 
         const result = await UsersModel.update(id, userData);

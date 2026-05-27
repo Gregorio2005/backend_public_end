@@ -53,23 +53,24 @@ const AuthController = {
      */
     login: async (req, res, next) => {
         try {
-            const { user, password } = req.body;
+            const { user, email, password } = req.body;
+            const identifier = user || email;
 
-            if (!user || !password) {
-                return res.status(400).json({ success: false, message: 'Usuario y contraseña requeridos' });
+            if (!identifier || !password) {
+                return res.status(400).json({ success: false, message: 'Usuario o correo y contraseña requeridos' });
             }
 
-            // Buscamos al usuario en la tabla public.users
+            // Buscamos al usuario usando LOWER para evitar problemas de mayúsculas
             const result = await pool.query(
-                'SELECT * FROM public.users WHERE "user" = $1',
-                [user]
+                'SELECT * FROM public.users WHERE "user" = $1 OR email = $2',
+                [identifier, identifier]
             );
 
             const dbUser = result.rows[0];
 
             // 1. Verificar si el usuario existe
             if (!dbUser) {
-                return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
+                return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
             }
 
             // 2. Verificar si el usuario está activo
@@ -79,7 +80,7 @@ const AuthController = {
 
             // 3. Validar la contraseña (comparación bcrypt)
             if (!(await bcrypt.compare(password, dbUser.password))) {
-                return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
+                return res.status(401).json({ success: false, message: 'Contraseña incorrecta' });
             }
 
             // Generamos el token con el ID y el rol definido en el esquema

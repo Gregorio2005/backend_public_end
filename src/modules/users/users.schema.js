@@ -20,7 +20,15 @@ const userSchema = z.object({
  * Esquema para actualización parcial de usuarios
  */
 const updateUserSchema = z.object({
-    body: userSchema.shape.body.partial().omit({ password: true }),
+    body: z.object({
+        user: z.string().min(4).optional(),
+        name: z.string().min(2).optional(),
+        lastname: z.string().min(2).optional(),
+        ci: z.string().min(5).optional(),
+        email: z.string().email().optional(),
+        roles_id: z.number().int().positive().optional(),
+        status: z.enum(['Activo', 'Inactivo']).optional(),
+    }),
 });
 
 module.exports = { 
