@@ -20,6 +20,7 @@ Abre una terminal en la raíz del proyecto y ejecuta:
 3. **Configurar variables de entorno**:
    - Crea un archivo llamado `.env` en la raíz del proyecto.
    - Copia y ajusta los valores según tu configuración local (ver `src/config/envs.js`).
+   - Agrega `FRONTEND_URL=http://localhost:5173` para los enlaces de recuperación de contraseña.
 4. **Inicializar Base de Datos**:
    - Abre tu cliente de PostgreSQL (pgAdmin, psql o DBeaver).
    - Crea una base de datos (ej: `sealing_products_sa`).

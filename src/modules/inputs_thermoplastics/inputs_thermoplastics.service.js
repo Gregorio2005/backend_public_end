@@ -4,23 +4,23 @@ const InputsThermoplasticsService = {
     getAll: async () => {
         return await InputsThermoplasticsModel.findAll();
     },
+
     getById: async (id) => {
-        const result = await InputsThermoplasticsModel.findById(id);
-        if (!result) throw new Error('Insumo termoplástico no encontrado');
-        return result;
+        const item = await InputsThermoplasticsModel.findById(id);
+        if (!item) throw new Error('Insumo termoplástico no encontrado');
+        return item;
     },
-    create: async (data) => {
-        return await InputsThermoplasticsModel.create(data);
+
+    create: async (payload) => {
+        return await InputsThermoplasticsModel.create(payload);
     },
-    update: async (id, data) => {
-        const result = await InputsThermoplasticsModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+
+    update: async (id, payload) => {
+        return await InputsThermoplasticsModel.update(id, payload);
     },
+
     delete: async (id) => {
-        const result = await InputsThermoplasticsModel.delete(id);
-        if (!result) throw new Error('No se pudo eliminar: Insumo no encontrado');
-        return result;
+        return await InputsThermoplasticsModel.delete(id);
     }
 };
 

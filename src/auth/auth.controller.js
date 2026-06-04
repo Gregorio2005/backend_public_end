@@ -3,6 +3,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
+const jwt = require('jsonwebtoken');
 const { createToken } = require('./jwt_utils');
 const { sendEmail } = require('../utils/mailer');
 
@@ -90,6 +91,7 @@ const AuthController = {
                 success: true, 
                 token,
                 user: {
+                    id: dbUser.id,
                     name: dbUser.name,
                     role: dbUser.roles_id,
                     email: dbUser.email
@@ -160,7 +162,7 @@ const AuthController = {
     getProfile: async (req, res, next) => {
         try {
             const result = await pool.query(
-                `SELECT u."user", u.name, u.lastname, u.ci, u.email, r.name as role, u.status 
+                `SELECT u.id, u."user", u.name, u.lastname, u.ci, u.email, r.name as role, u.status 
                  FROM public.users u
                  JOIN public.roles r ON u.roles_id = r.id
                  WHERE u.id = $1`,
@@ -323,18 +325,17 @@ const AuthController = {
 
             const user = userCheck.rows[0];
 
-            // 2. Crear nueva contraseña temporal (8 caracteres aleatorios)
-            const tempPassword = crypto.randomBytes(4).toString('hex');
-
-            // 3. Encriptar la nueva contraseña
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(tempPassword, salt);
-
-            // 4. Actualizar en la base de datos
-            await pool.query(
-                'UPDATE public.users SET password = $1 WHERE id = $2',
-                [hashedPassword, user.id]
+            // 2. Generar Token de Recuperación (Expira en 15 minutos)
+            const resetToken = jwt.sign(
+                { id: user.id, purpose: 'password_reset' },
+                process.env.JWT_SECRET || 'tu_clave_secreta_aqui',
+                { expiresIn: '15m' }
             );
+
+            // 3. Construir URL de recuperación (Frontend)
+            // REVISA TU PUERTO DE VITE AQUÍ (¿Es 5173 o 5174?)
+            const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+            const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
             // Ruta a tu imagen local
             const logoPath = path.join(__dirname, '../assets/logo_empresa.jpeg');
@@ -359,12 +360,13 @@ const AuthController = {
                                 <h2 style="color: #2c3e50; margin-top: 0;">Hola, ${user.name}</h2>
                                 <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta de usuario: <strong>${user.user}</strong>.</p>
                                 
-                                <div style="background-color: #f9f9f9; border-left: 4px solid #2c3e50; padding: 15px; margin: 25px 0; text-align: center;">
-                                    <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #777;">Tu nueva contraseña temporal</p>
-                                    <p style="margin: 10px 0 0; font-size: 28px; font-weight: bold; color: #2c3e50; letter-spacing: 2px;">${tempPassword}</p>
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="${resetUrl}" style="background-color: #2c3e50; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                        Restablecer Contraseña
+                                    </a>
                                 </div>
 
-                                <p>Por favor, utiliza esta clave para iniciar sesión y asegúrate de <strong>cambiarla inmediatamente</strong> desde la configuración de tu perfil por razones de seguridad.</p>
+                                <p>Este enlace es válido por los próximos <strong>15 minutos</strong>. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.</p>
                                 
                                 <div style="text-align: center; margin-top: 30px;">
                                     <p style="font-size: 13px; color: #888;">Este es un mensaje automático, por favor no respondas a este correo.</p>
@@ -393,9 +395,49 @@ const AuthController = {
 
             res.json({ 
                 success: true, 
-                message: `Se ha enviado una nueva contraseña al correo: ${email}`
+                message: `Se ha enviado un enlace de recuperación al correo: ${email}`
             });
         } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
+     * Procesa el cambio de contraseña mediante el token de recuperación.
+     */
+    resetPassword: async (req, res, next) => {
+        try {
+            const { token, password } = req.body;
+
+            // 1. Verificar Token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tu_clave_secreta_aqui');
+            
+            if (decoded.purpose !== 'password_reset') {
+                return res.status(400).json({ success: false, message: 'Token inválido para esta operación' });
+            }
+
+            // 2. Encriptar nueva contraseña
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            // 3. Actualizar en DB
+            const result = await pool.query(
+                'UPDATE public.users SET password = $1, update_at = CURRENT_DATE WHERE id = $2 RETURNING id',
+                [hashedPassword, decoded.id]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            }
+
+            res.json({ success: true, message: 'Tu contraseña ha sido actualizada con éxito. Ya puedes iniciar sesión.' });
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({ success: false, message: 'El enlace ha expirado. Por favor, solicita uno nuevo.' });
+            }
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(400).json({ success: false, message: 'El enlace de recuperación es inválido o ha sido alterado.' });
+            }
             next(error);
         }
     }

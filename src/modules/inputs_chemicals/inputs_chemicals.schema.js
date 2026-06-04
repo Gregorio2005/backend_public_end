@@ -1,15 +1,13 @@
 const { z } = require('zod');
 
 /**
- * Esquema de validación para Insumos Químicos (inputs_chemicals).
+ * Esquema de validación para Insumos Químicos.
+ * Solo requiere la referencia, ya que no posee especificaciones técnicas adicionales.
  */
 const inputsChemicalsSchema = z.object({
     body: z.object({
-        reference: z.string().min(1, "La referencia es obligatoria"),
-        user_id: z.number().int().positive("El ID de usuario es obligatorio"),
-        presentation: z.boolean("La presentación debe ser un valor booleano"),
-        batch_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha de lote inválido (YYYY-MM-DD)"),
-        production_test: z.boolean().optional().nullable()
+        reference: z.string({ required_error: "La referencia es obligatoria" }).min(1, "La referencia no puede estar vacía"),
+        user_id: z.number().optional()
     })
 });
 

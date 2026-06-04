@@ -9,6 +9,7 @@ const InputsChemicalsController = {
             next(error);
         }
     },
+
     getOne: async (req, res, next) => {
         try {
             const data = await InputsChemicalsService.getById(req.params.id);
@@ -17,22 +18,31 @@ const InputsChemicalsController = {
             next(error);
         }
     },
+
     create: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsService.create(req.body);
+            // Priorizamos el ID del usuario autenticado en el token
+            const data = await InputsChemicalsService.create({
+                reference: req.body.reference,
+                user_id: req.user?.id || req.body.user_id
+            });
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     update: async (req, res, next) => {
         try {
-            const data = await InputsChemicalsService.update(req.params.id, req.body);
+            const data = await InputsChemicalsService.update(req.params.id, {
+                reference: req.body.reference
+            });
             res.json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     remove: async (req, res, next) => {
         try {
             await InputsChemicalsService.delete(req.params.id);

@@ -19,9 +19,16 @@ const InputsStuffingStampsDownspoutsController = {
     },
     create: async (req, res, next) => {
         try {
-            const data = await InputsStuffingStampsDownspoutsService.create(req.body);
+            // Usamos el id del token si existe, de lo contrario usamos el que viene en el body
+            // Esto evita el error 'Cannot read properties of undefined (reading 'id')'
+            console.log("Recibiendo datos para Estopera:", req.body);
+            const data = await InputsStuffingStampsDownspoutsService.create({
+                ...req.body,
+                user_id: req.user?.id || req.body.user_id
+            });
             res.status(201).json({ success: true, data });
         } catch (error) {
+            console.error("Error en DB Trigger/Service:", error.message);
             next(error);
         }
     },

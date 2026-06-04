@@ -4,23 +4,23 @@ const InputsChemicalsService = {
     getAll: async () => {
         return await InputsChemicalsModel.findAll();
     },
+
     getById: async (id) => {
-        const result = await InputsChemicalsModel.findById(id);
-        if (!result) throw new Error('Insumo químico no encontrado');
-        return result;
+        const item = await InputsChemicalsModel.findById(id);
+        if (!item) throw new Error('Insumo químico no encontrado');
+        return item;
     },
-    create: async (data) => {
-        return await InputsChemicalsModel.create(data);
+
+    create: async (payload) => {
+        return await InputsChemicalsModel.create(payload);
     },
-    update: async (id, data) => {
-        const result = await InputsChemicalsModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+
+    update: async (id, payload) => {
+        return await InputsChemicalsModel.update(id, payload);
     },
+
     delete: async (id) => {
-        const result = await InputsChemicalsModel.delete(id);
-        if (!result) throw new Error('No se pudo eliminar: Insumo no encontrado');
-        return result;
+        return await InputsChemicalsModel.delete(id);
     }
 };
 

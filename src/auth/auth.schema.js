@@ -29,8 +29,16 @@ const updateProfileSchema = z.object({
     }),
 });
 
+const resetPasswordSchema = z.object({
+    body: z.object({
+        token: z.string().min(1, "El token es requerido"),
+        password: z.string().min(6, "La nueva contraseña debe tener al menos 6 caracteres"),
+    }),
+});
+
 module.exports = {
     loginSchema,
     forgotPasswordSchema,
-    updateProfileSchema
+    updateProfileSchema,
+    resetPasswordSchema
 };

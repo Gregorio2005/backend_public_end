@@ -35,11 +35,18 @@ Se han implementado nuevos endpoints en el backend y componentes en el frontend 
 
 #### POST `/api/auth/forgot_password`
 - **Body (JSON)**: `{ "email": "str" }`
-- **Descripción**: Flujo de recuperación automática.
+- **Descripción**: Inicia el flujo de recuperación segura de contraseña.
     1. Valida la existencia del correo.
-    2. Genera una clave temporal aleatoria de 8 caracteres (hex).
-    3. Actualiza el hash en la DB.
-    4. Envía un correo electrónico corporativo con la nueva clave y el logo de la empresa adjunto.
+    2. Genera un Token de Recuperación (JWT) con validez de 15 minutos.
+    3. Envía un correo con un enlace que redirige a la página de cambio de clave en el frontend.
+
+#### POST `/api/auth/reset_password`
+- **Body (JSON)**: `{ "token": "str", "password": "str" }`
+- **Descripción**: Procesa el cambio final de contraseña.
+    1. Verifica la integridad y tiempo de vida del token.
+    2. Encripta la nueva contraseña proporcionada por el usuario.
+    3. Actualiza el registro del usuario en la base de datos.
+    4. Invalida el proceso de recuperación anterior para evitar reuso del link.
 
 #### Seguridad y Middleware
 - **Hashing**: Se utiliza **bcrypt** para el cifrado de contraseñas con un factor de costo (salt) configurado.

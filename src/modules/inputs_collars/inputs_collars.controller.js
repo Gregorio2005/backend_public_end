@@ -9,6 +9,7 @@ const InputsCollarsController = {
             next(error);
         }
     },
+
     getOne: async (req, res, next) => {
         try {
             const data = await InputsCollarsService.getById(req.params.id);
@@ -17,22 +18,33 @@ const InputsCollarsController = {
             next(error);
         }
     },
+
     create: async (req, res, next) => {
         try {
-            const data = await InputsCollarsService.create(req.body);
+            const data = await InputsCollarsService.create({
+                ...req.body,
+                user_id: req.user?.id || req.body.user_id
+            });
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     update: async (req, res, next) => {
         try {
-            const data = await InputsCollarsService.update(req.params.id, req.body);
+            const data = await InputsCollarsService.update(req.params.id, {
+                reference: req.body.reference,
+                internal_diameter: req.body.internal_diameter,
+                height: req.body.height,
+                user_id: req.user?.id || req.body.user_id
+            });
             res.json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     remove: async (req, res, next) => {
         try {
             await InputsCollarsService.delete(req.params.id);

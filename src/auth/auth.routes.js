@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const AuthController = require('./auth.controller');
 const { validateRequest } = require('../middleware/validator');
-const { loginSchema, forgotPasswordSchema, updateProfileSchema } = require('./auth.schema');
+const { loginSchema, forgotPasswordSchema, updateProfileSchema, resetPasswordSchema } = require('./auth.schema');
 const { verifyToken } = require('./auth');
 
 // Endpoint público para registrar un nuevo usuario
@@ -22,5 +22,8 @@ router.put('/profile_update', verifyToken, validateRequest(updateProfileSchema),
 
 // Endpoint para recuperación de contraseña
 router.post('/forgot_password', validateRequest(forgotPasswordSchema), AuthController.forgotPassword);
+
+// Endpoint para restablecer la contraseña con el token
+router.post('/reset_password', validateRequest(resetPasswordSchema), AuthController.resetPassword);
 
 module.exports = router;

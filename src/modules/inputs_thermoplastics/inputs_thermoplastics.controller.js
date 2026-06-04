@@ -9,6 +9,7 @@ const InputsThermoplasticsController = {
             next(error);
         }
     },
+
     getOne: async (req, res, next) => {
         try {
             const data = await InputsThermoplasticsService.getById(req.params.id);
@@ -17,22 +18,31 @@ const InputsThermoplasticsController = {
             next(error);
         }
     },
+
     create: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsService.create(req.body);
+            // Obtenemos el ID del usuario desde el token (middleware verifyToken)
+            const data = await InputsThermoplasticsService.create({
+                reference: req.body.reference,
+                user_id: req.user?.id || req.body.user_id
+            });
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     update: async (req, res, next) => {
         try {
-            const data = await InputsThermoplasticsService.update(req.params.id, req.body);
+            const data = await InputsThermoplasticsService.update(req.params.id, {
+                reference: req.body.reference
+            });
             res.json({ success: true, data });
         } catch (error) {
             next(error);
         }
     },
+
     remove: async (req, res, next) => {
         try {
             await InputsThermoplasticsService.delete(req.params.id);
