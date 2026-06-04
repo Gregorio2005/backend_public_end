@@ -1,0 +1,12 @@
+# Dependencias
+node_modules/
+
+# Entorno
+.env
+
+# Logs y temporales
+npm-debug.log*
+.vscode/
+
+# Compilación
+dist/
