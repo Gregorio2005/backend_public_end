@@ -53,6 +53,7 @@ const inspectionThermoplasticsRoutes = require('./src/modules/inspection_thermop
 const applicantsRoutes = require('./src/auth/applicants.routes');
 const reportsApprovedRoutes = require('./src/modules/reports_approved/reports_approved.routes');
 const reportsRefusedRoutes = require('./src/modules/reports_refused/reports_refused.routes');
+const websiteNoticeRoutes = require('./src/auth/website_notice.routes'); // Nueva importación
 
 // Rutas Base
 app.get('/', (req, res) => {
@@ -91,6 +92,7 @@ app.use(`${API_PREFIX}/inspection-thermoplastics`, inspectionThermoplasticsRoute
 app.use(`${API_PREFIX}/applicants`, applicantsRoutes);
 app.use(`${API_PREFIX}/reports-approved`, reportsApprovedRoutes);
 app.use(`${API_PREFIX}/reports-refused`, reportsRefusedRoutes);
+app.use(`${API_PREFIX}/website-notice`, websiteNoticeRoutes); // Montaje de la nueva ruta
 
 // Manejo de errores (Debe ir después de las rutas)
 app.use(errorHandler);
