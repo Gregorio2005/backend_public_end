@@ -25,12 +25,55 @@ const WebsiteNoticeModel = {
      */
     getAll: async () => {
         try {
+            // Ordenamos por status DESC para que el mensaje activo sea siempre el primero
             const result = await pool.query(
-                'SELECT id, name, note FROM public.mensajes_web ORDER BY id DESC'
+                'SELECT id, name, note, status FROM public.mensajes_web ORDER BY status DESC, id DESC'
             );
             return result.rows;
         } catch (error) {
             throw new Error(`Error al obtener los avisos web: ${error.message}`);
+        }
+    },
+
+    /**
+     * Activa un aviso específico y desactiva todos los demás.
+     * @param {number|string} id - El ID del aviso a publicar.
+     */
+    setActive: async (id) => {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Ponemos todos los mensajes en false
+            await client.query('UPDATE public.mensajes_web SET status = FALSE');
+            // Activamos el mensaje seleccionado
+            const result = await client.query(
+                'UPDATE public.mensajes_web SET status = TRUE WHERE id = $1 RETURNING *',
+                [id]
+            );
+            await client.query('COMMIT');
+            return result.rows[0];
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw new Error(`Error al activar el aviso web: ${error.message}`);
+        } finally {
+            client.release();
+        }
+    },
+
+    /**
+     * Obtiene un aviso específico por su ID.
+     * @param {number|string} id - El ID del aviso a buscar.
+     * @returns {Promise<Object>} El aviso encontrado.
+     */
+    getById: async (id) => {
+        try {
+            const result = await pool.query(
+                'SELECT id, name, note FROM public.mensajes_web WHERE id = $1',
+                [id]
+            );
+            return result.rows[0];
+        } catch (error) {
+            throw new Error(`Error al obtener el aviso web por ID: ${error.message}`);
         }
     }
 };

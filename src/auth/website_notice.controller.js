@@ -33,6 +33,48 @@ const WebsiteNoticeController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    /**
+     * Obtiene un aviso específico por ID (para edición en el panel admin).
+     */
+    getNoticeById: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const notice = await WebsiteNoticeModel.getById(id);
+
+            if (!notice) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'El comunicado seleccionado no existe en la base de datos.',
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                data: notice,
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    /**
+     * Marca un aviso como el activo para mostrar en la web.
+     */
+    publishNotice: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const notice = await WebsiteNoticeModel.setActive(id);
+
+            res.status(200).json({
+                success: true,
+                message: 'Aviso publicado oficialmente en el sitio web.',
+                data: notice,
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 
