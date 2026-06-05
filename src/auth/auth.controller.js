@@ -335,7 +335,7 @@ const AuthController = {
 
             // 3. Construir URL de recuperación (Frontend)
             // REVISA TU PUERTO DE VITE AQUÍ (¿Es 5173 o 5174?)
-            const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+            const frontendUrl = (require('../config/envs').FRONTEND_URL).replace(/\/$/, '');
             const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
             /**
@@ -386,9 +386,7 @@ const AuthController = {
                             </div>
                         </div>
                     </div>
-                `,
-                // Dejamos los adjuntos vacíos para cumplir con la restricción de URLs de Resend
-                attachments: [] 
+                `
             });
 
             res.json({ 

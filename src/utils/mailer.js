@@ -1,49 +1,54 @@
-const { Resend } = require('resend');
-const { RESEND_API_KEY, PROJECT_NAME } = require('../config/envs');
+const emailjs = require('@emailjs/nodejs');
+const { 
+    EMAILJS_SERVICE_ID, 
+    EMAILJS_TEMPLATE_ID, 
+    EMAILJS_PUBLIC_KEY, 
+    EMAILJS_PRIVATE_KEY, 
+    PROJECT_NAME 
+} = require('../config/envs');
 
 /**
- * Inicialización del cliente de Resend.
- * Esto evita el bloqueo de puertos SMTP en hostings como Railway/Render.
+ * Configuración global de EmailJS para Node.js
  */
-const resend = new Resend(RESEND_API_KEY);
+emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY,
+    privateKey: EMAILJS_PRIVATE_KEY,
+});
 
 /**
  * Función reutilizable para enviar correos electrónicos.
+ * En EmailJS, los datos se envían como variables para la plantilla definida en el dashboard.
  */
-const sendEmail = async ({ to, subject, html, attachments, fromName }) => {
+const sendEmail = async ({ to, subject, html, text, fromName, templateParams }) => {
     try {
-        /**
-         * Filtramos los adjuntos: Resend requiere que 'path' sea una URL (http/https).
-         * Si en el futuro usas URLs públicas, aquí se mapearán automáticamente.
-         */
-        const mappedAttachments = attachments?.filter(att => att.path && att.path.startsWith('http')).map(att => ({
-            filename: att.filename,
-            path: att.path,
-        })) || [];
+        // Estos nombres de la izquierda (to_email, subject...) son los que DEBES 
+        // usar en el Dashboard de EmailJS entre llaves {{ }}
+        const params = {
+            to_email: to,
+            subject: subject,
+            message_html: html,
+            message_text: text || "Contenido en texto plano no disponible",
+            from_name: fromName || PROJECT_NAME,
+            project_name: PROJECT_NAME,
+            ...templateParams // Esto permite inyectar {{name}}, {{role}}, etc.
+        };
 
-        const { data, error } = await resend.emails.send({
-            from: `${fromName || PROJECT_NAME} <onboarding@resend.dev>`,
-            to,
-            subject,
-            html,
-            attachments: mappedAttachments
-        });
+        const response = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            params
+        );
 
-        if (error) {
-            throw error;
-        }
-
-        console.log("📧 Correo enviado con ID:", data.id);
+        console.log("📧 Correo enviado vía EmailJS con éxito:", response.status, response.text);
         
         if (process.env.NODE_ENV === 'development') {
-            console.log("📬 Enviando vía Resend a:", to);
+            console.log("📬 Destinatario:", to);
         }
 
-        return data;
+        return response;
     } catch (error) {
-        console.error("❌ Error en el servicio de Resend:", error.message);
-        // Si es un error de Resend, a veces viene en la propiedad error.message o el objeto mismo
-        const errorMessage = error.message || "Error desconocido en el proveedor de correo";
+        console.error("❌ Error en el servicio de EmailJS:", error);
+        const errorMessage = error?.text || error?.message || "Error desconocido en el proveedor de correo";
         throw new Error(`No se pudo enviar el correo: ${errorMessage}`);
     }
 };
@@ -99,7 +104,12 @@ const sendApplicantConfirmation = async (email, name, role) => {
         to: email,
         fromName: `Reclutamiento - ${PROJECT_NAME}`,
         subject: `Confirmación de Postulación y Citación a Entrevista - ${PROJECT_NAME}`,
-        html: htmlContent
+        html: htmlContent,
+        templateParams: {
+            name: name,
+            role: role,
+            formattedDate: formattedDate
+        }
     });
 };
 

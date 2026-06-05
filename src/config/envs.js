@@ -22,13 +22,12 @@ const envSchema = z.object({
     // Definición de nombres para el sistema de enrutamiento global
     API_PREFIX: z.string().default('/api'),
     PROJECT_NAME: z.string().default('Gestión de Insumos API'),
-    // Configuración de Resend (Prioritario para producción/hosting)
-    RESEND_API_KEY: z.string().min(1, "La API Key de Resend es obligatoria"),
-    // Configuración de Servidor de Correo (Nodemailer)
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.string().default('587').transform(Number),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASS: z.string().optional()
+    FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+    // Configuración de EmailJS
+    EMAILJS_SERVICE_ID: z.string().min(1, "El Service ID de EmailJS es obligatorio"),
+    EMAILJS_TEMPLATE_ID: z.string().min(1, "El Template ID de EmailJS es obligatorio"),
+    EMAILJS_PUBLIC_KEY: z.string().min(1, "La Public Key de EmailJS es obligatoria"),
+    EMAILJS_PRIVATE_KEY: z.string().min(1, "La Private Key de EmailJS es obligatoria")
 });
 
 const result = envSchema.safeParse(process.env);
