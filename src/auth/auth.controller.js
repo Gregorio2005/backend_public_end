@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken');
 const { createToken } = require('./jwt_utils');
+const { PROJECT_NAME } = require('../config/envs');
 const { sendEmail } = require('../utils/mailer');
 
 const AuthController = {
@@ -337,22 +338,24 @@ const AuthController = {
             const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
             const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-            // Ruta a tu imagen local
-            const logoPath = path.join(__dirname, '../assets/logo_empresa.jpeg');
-            
-            // Verificar si la imagen existe para no romper el envío
-            const hasLogo = fs.existsSync(logoPath);
+            /**
+             * CONFIGURACIÓN DEL LOGO (Eliminado lógicamente para evitar errores de ruta local)
+             * Cuando tengas una URL pública (ej. Cloudinary, Imgur, S3), descomenta logoUrl y cambia hasLogo a true.
+             */
+            // const logoUrl = 'https://tu-dominio.com/logo.png'; 
+            const hasLogo = false; 
 
             // 5. Enviar el correo con la contraseña en texto plano
             await sendEmail({
                 to: user.email,
-                subject: `Recuperación de Contraseña - ${user.name}`,
+                fromName: `Seguridad - ${PROJECT_NAME}`,
+                subject: `Restablecimiento de Contraseña - Sistema SICVIC`,
                 html: `
                     <div style="background-color: #dcdcdc; padding: 40px 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                             <!-- Header con Color Corporativo -->
                             <div style="background-color: #2c3e50; padding: 20px; text-align: center;">
-                                ${hasLogo ? '<img src="cid:logo_empresa" alt="Logo" style="max-height: 80px; width: auto;">' : '<h1 style="color: #ffffff; margin: 0; font-size: 20px;">Sealing Products C.A.</h1>'}
+                                ${hasLogo ? `<img src="${logoUrl}" alt="Logo" style="max-height: 80px; width: auto;">` : `<h1 style="color: #ffffff; margin: 0; font-size: 20px;">${PROJECT_NAME}</h1>`}
                             </div>
                             
                             <!-- Cuerpo del Mensaje -->
@@ -384,13 +387,8 @@ const AuthController = {
                         </div>
                     </div>
                 `,
-                attachments: hasLogo ? [
-                    {
-                        filename: 'logo_empresa.jpeg',
-                        path: logoPath,
-                        cid: 'logo_empresa' // Este ID debe coincidir con el src="cid:..." del HTML
-                    }
-                ] : []
+                // Dejamos los adjuntos vacíos para cumplir con la restricción de URLs de Resend
+                attachments: [] 
             });
 
             res.json({ 

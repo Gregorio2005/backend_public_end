@@ -22,11 +22,13 @@ const envSchema = z.object({
     // Definición de nombres para el sistema de enrutamiento global
     API_PREFIX: z.string().default('/api'),
     PROJECT_NAME: z.string().default('Gestión de Insumos API'),
+    // Configuración de Resend (Prioritario para producción/hosting)
+    RESEND_API_KEY: z.string().min(1, "La API Key de Resend es obligatoria"),
     // Configuración de Servidor de Correo (Nodemailer)
-    SMTP_HOST: z.string().min(1, "El host SMTP es obligatorio"),
+    SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.string().default('587').transform(Number),
-    SMTP_USER: z.string().min(1, "El usuario SMTP es obligatorio"),
-    SMTP_PASS: z.string().min(1, "La contraseña SMTP es obligatoria")
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional()
 });
 
 const result = envSchema.safeParse(process.env);

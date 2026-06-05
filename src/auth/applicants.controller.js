@@ -1,4 +1,5 @@
 const ApplicantsModel = require('./applicants.model');
+const { sendApplicantConfirmation } = require('../utils/mailer');
 
 const ApplicantsController = {
     /**
@@ -24,10 +25,19 @@ const ApplicantsController = {
     createApplicant: async (req, res, next) => {
         try {
             const newApplicant = await ApplicantsModel.create(req.body);
+
+            // Enviar correo automático de confirmación y cita
+            // Extraemos los datos necesarios del objeto creado
+            await sendApplicantConfirmation(
+                newApplicant.email,
+                `${newApplicant.name} ${newApplicant.lastname}`,
+                newApplicant.rol
+            );
+
             res.status(201).json({
                 success: true,
                 data: newApplicant,
-                message: 'Postulación enviada correctamente.'
+                message: 'Postulación enviada correctamente y correo de entrevista programado.'
             });
         } catch (error) {
             next(error);
