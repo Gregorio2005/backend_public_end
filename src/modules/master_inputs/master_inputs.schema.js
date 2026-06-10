@@ -8,7 +8,8 @@ const masterInputsSchema = z.object({
     body: z.object({
         inputs_id: z.number().int().positive("El ID de insumo es obligatorio"),
         type_inputs_id: z.number().int().positive("El ID de tipo de insumo es obligatorio"),
-        status: z.enum(['Vigente', 'Desuso']).default('Vigente')
+        suppliers_id: z.number().int().positive("El ID del proveedor es obligatorio"),
+        status: z.enum(['Vigente', 'Desuso']).default('Vigente'),
     })
 });
 
