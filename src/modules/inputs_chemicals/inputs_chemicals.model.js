@@ -2,7 +2,7 @@ const pool = require('../../config/db');
 
 const InputsChemicalsModel = {
     findAll: async () => {
-        const query = 'SELECT * FROM public.inputs_chemicals ORDER BY create_at DESC';
+        const query = 'SELECT * FROM public.inputs_chemicals ORDER BY created_at DESC';
         const result = await pool.query(query);
         return result.rows;
     },
