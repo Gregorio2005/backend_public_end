@@ -3,7 +3,7 @@ const InspectionStuffingStampsDownspoutsService = require('./inspection_stuffing
 const InspectionStuffingStampsDownspoutsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionStuffingStampsDownspoutsService.getAll();
+            const data = await InspectionStuffingStampsDownspoutsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

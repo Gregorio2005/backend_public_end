@@ -3,7 +3,7 @@ const InspectionCardboardService = require('./inspection_cardboard.service');
 const InspectionCardboardController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCardboardService.getAll();
+            const data = await InspectionCardboardService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

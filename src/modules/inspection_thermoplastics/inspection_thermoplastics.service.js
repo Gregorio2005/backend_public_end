@@ -1,7 +1,7 @@
 const InspectionThermoplasticsModel = require('./inspection_thermoplastics.model');
 
 const InspectionThermoplasticsService = {
-    getAll: () => InspectionThermoplasticsModel.findAll(),
+    getAll: (billInputsId) => InspectionThermoplasticsModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionThermoplasticsModel.findById(id);
         if (!result) throw new Error('Inspección termoplástica no encontrada');

@@ -3,7 +3,7 @@ const InspectionCamerasService = require('./inspection_cameras.service');
 const InspectionCamerasController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCamerasService.getAll();
+            const data = await InspectionCamerasService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

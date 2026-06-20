@@ -1,7 +1,7 @@
 const InspectionCardboardModel = require('./inspection_cardboard.model');
 
 const InspectionCardboardService = {
-    getAll: () => InspectionCardboardModel.findAll(),
+    getAll: (billInputsId) => InspectionCardboardModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionCardboardModel.findById(id);
         if (!result) throw new Error('Inspección de cartón no encontrada');

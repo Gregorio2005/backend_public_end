@@ -1,7 +1,7 @@
 const InspectionBagsModel = require('./inspection_bags.model');
 
 const InspectionBagsService = {
-    getAll: () => InspectionBagsModel.findAll(),
+    getAll: (billInputsId) => InspectionBagsModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionBagsModel.findById(id);
         if (!result) throw new Error('Inspección de bolsa no encontrada');

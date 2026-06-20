@@ -3,7 +3,7 @@ const InspectionOringService = require('./inspection_oring.service');
 const InspectionOringController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionOringService.getAll();
+            const data = await InspectionOringService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

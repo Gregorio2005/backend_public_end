@@ -3,7 +3,7 @@ const InspectionStampsService = require('./inspection_stamps.service');
 const InspectionStampsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionStampsService.getAll();
+            const data = await InspectionStampsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

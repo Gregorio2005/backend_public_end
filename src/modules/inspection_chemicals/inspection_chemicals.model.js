@@ -1,7 +1,11 @@
 const pool = require('../../config/db');
 
 const InspectionChemicalsModel = {
-    findAll: async () => {
+    findAll: async (billInputsId) => {
+        if (billInputsId) {
+            const { rows } = await pool.query('SELECT * FROM public.inspection_chemicals WHERE bill_inputs_id = $1 ORDER BY id ASC', [billInputsId]);
+            return rows;
+        }
         const { rows } = await pool.query('SELECT * FROM public.inspection_chemicals ORDER BY id ASC');
         return rows;
     },

@@ -1,7 +1,7 @@
 const InspectionChemicalsModel = require('./inspection_chemicals.model');
 
 const InspectionChemicalsService = {
-    getAll: () => InspectionChemicalsModel.findAll(),
+    getAll: (billInputsId) => InspectionChemicalsModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionChemicalsModel.findById(id);
         if (!result) throw new Error('Inspección química no encontrada');

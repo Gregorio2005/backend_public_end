@@ -1,7 +1,7 @@
 const InspectionCollarsModel = require('./inspection_collars.model');
 
 const InspectionCollarsService = {
-    getAll: () => InspectionCollarsModel.findAll(),
+    getAll: (billInputsId) => InspectionCollarsModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionCollarsModel.findById(id);
         if (!result) throw new Error('Inspección de collar no encontrada');

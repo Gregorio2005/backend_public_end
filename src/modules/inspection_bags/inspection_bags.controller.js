@@ -3,7 +3,7 @@ const InspectionBagsService = require('./inspection_bags.service');
 const InspectionBagsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionBagsService.getAll();
+            const data = await InspectionBagsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

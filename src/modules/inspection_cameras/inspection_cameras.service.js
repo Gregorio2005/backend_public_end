@@ -1,7 +1,7 @@
 const InspectionCamerasModel = require('./inspection_cameras.model');
 
 const InspectionCamerasService = {
-    getAll: async () => await InspectionCamerasModel.findAll(),
+    getAll: async (billInputsId) => await InspectionCamerasModel.findAll(billInputsId),
 
     getById: async (id) => {
         const result = await InspectionCamerasModel.findById(id);

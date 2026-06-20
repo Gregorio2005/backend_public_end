@@ -3,7 +3,7 @@ const InspectionCollarsService = require('./inspection_collars.service');
 const InspectionCollarsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCollarsService.getAll();
+            const data = await InspectionCollarsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

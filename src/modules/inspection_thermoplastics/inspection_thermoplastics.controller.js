@@ -3,7 +3,7 @@ const InspectionThermoplasticsService = require('./inspection_thermoplastics.ser
 const InspectionThermoplasticsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionThermoplasticsService.getAll();
+            const data = await InspectionThermoplasticsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

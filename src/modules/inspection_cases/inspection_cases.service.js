@@ -1,7 +1,7 @@
 const InspectionCasesModel = require('./inspection_cases.model');
 
 const InspectionCasesService = {
-    getAll: () => InspectionCasesModel.findAll(),
+    getAll: (billInputsId) => InspectionCasesModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionCasesModel.findById(id);
         if (!result) throw new Error('Inspección de caja no encontrada');

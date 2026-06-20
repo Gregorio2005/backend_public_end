@@ -3,7 +3,7 @@ const InspectionChemicalsService = require('./inspection_chemicals.service');
 const InspectionChemicalsController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionChemicalsService.getAll();
+            const data = await InspectionChemicalsService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

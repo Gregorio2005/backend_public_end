@@ -3,7 +3,7 @@ const InspectionCasesService = require('./inspection_cases.service');
 const InspectionCasesController = {
     getAll: async (req, res, next) => {
         try {
-            const data = await InspectionCasesService.getAll();
+            const data = await InspectionCasesService.getAll(req.query.bill_inputs_id);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

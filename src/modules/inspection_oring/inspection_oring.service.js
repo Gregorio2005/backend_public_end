@@ -1,7 +1,7 @@
 const InspectionOringModel = require('./inspection_oring.model');
 
 const InspectionOringService = {
-    getAll: () => InspectionOringModel.findAll(),
+    getAll: (billInputsId) => InspectionOringModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionOringModel.findById(id);
         if (!result) throw new Error('Inspección de o-ring no encontrada');

@@ -1,7 +1,7 @@
 const InspectionStuffingStampsDownspoutsModel = require('./inspection_stuffing_stamps_downspouts.model');
 
 const InspectionStuffingStampsDownspoutsService = {
-    getAll: () => InspectionStuffingStampsDownspoutsModel.findAll(),
+    getAll: (billInputsId) => InspectionStuffingStampsDownspoutsModel.findAll(billInputsId),
     getById: async (id) => {
         const result = await InspectionStuffingStampsDownspoutsModel.findById(id);
         if (!result) throw new Error('Inspección de empaquetadura no encontrada');

@@ -12,8 +12,8 @@ const inspectionChemicalsSchema = z.object({
         production_test: z.boolean().optional().nullable(),
         review_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha inválido (YYYY-MM-DD)"),
         delivery_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha inválido (YYYY-MM-DD)"),
-        observation: z.string().max(100).optional().nullable(),
-        status: z.enum(['Aprobado', 'Rechazado', 'Observacion', 'Incompleta'])
+        observation: z.string().max(500).optional().nullable(),
+        status: z.enum(['Aprobado', 'Rechazado', 'Observacion', 'Incompleta', 'Aprobado Observacion', 'Rechazado Observacion'])
     })
 });
 
