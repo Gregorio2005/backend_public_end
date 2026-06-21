@@ -19,6 +19,19 @@ const TypeInputsController = {
         }
     },
 
+    getInputsByType: async (req, res, next) => {
+        try {
+            const typeId = parseInt(req.params.id, 10);
+            if (isNaN(typeId)) {
+                return res.status(400).json({ success: false, message: 'El ID del tipo debe ser un número válido' });
+            }
+            const data = await TypeInputsService.getInputsByTypeId(typeId);
+            res.json({ success: true, data });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     create: async (req, res, next) => {
         try {
             const data = await TypeInputsService.create(req.body);
