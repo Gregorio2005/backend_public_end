@@ -1,4 +1,5 @@
 const InspectionCollarsService = require('./inspection_collars.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionCollarsController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionCollarsController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionCollarsService.create(req.body);
+            notifyRole(4, `Nueva inspección de collares requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

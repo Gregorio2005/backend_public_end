@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
 require('dotenv').config();
 
 const { API_PREFIX } = require('./src/config/envs');
@@ -21,6 +22,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
+
+// Servir archivos estáticos desde la carpeta uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const authRouter = require('./src/auth/auth.routes');
 const rolesRoutes = require('./src/modules/roles/roles.routes');
@@ -56,6 +60,7 @@ const reportsRefusedRoutes = require('./src/modules/reports_refused/reports_refu
 const websiteNoticeRoutes = require('./src/auth/website_notice.routes'); // Nueva importación
 const inspectionStatsRoutes = require('./src/modules/inspection_stats/inspection_stats.routes');
 const manufacturingFlowRoutes = require('./src/modules/manufacturing_flow/manufacturing_flow.routes');
+const notificacionesRoutes = require('./src/modules/notifications/notifications.routes');
 
 // Rutas Base
 app.get('/', (req, res) => {
@@ -97,6 +102,7 @@ app.use(`${API_PREFIX}/reports-refused`, reportsRefusedRoutes);
 app.use(`${API_PREFIX}/website-notice`, websiteNoticeRoutes); // Montaje de la nueva ruta
 app.use(`${API_PREFIX}/inspection-stats`, inspectionStatsRoutes);
 app.use(`${API_PREFIX}/manufacturing-flow`, manufacturingFlowRoutes);
+app.use(`${API_PREFIX}/notificaciones`, notificacionesRoutes);
 
 // Manejo de errores (Debe ir después de las rutas)
 app.use(errorHandler);

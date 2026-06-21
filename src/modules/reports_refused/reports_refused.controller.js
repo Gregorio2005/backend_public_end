@@ -1,4 +1,5 @@
 const ReportsRefusedService = require('./reports_refused.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const ReportsRefusedController = {
     getAll: async (req, res, next) => {
@@ -22,6 +23,8 @@ const ReportsRefusedController = {
     create: async (req, res, next) => {
         try {
             const data = await ReportsRefusedService.create(req.body);
+            // Notificar a Jefes de Calidad (rol 3)
+            notifyRole(3, `Insumo rechazado registrado en el sistema.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

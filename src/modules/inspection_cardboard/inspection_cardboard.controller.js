@@ -1,4 +1,5 @@
 const InspectionCardboardService = require('./inspection_cardboard.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionCardboardController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionCardboardController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionCardboardService.create(req.body);
+            notifyRole(4, `Nueva inspección de cartón requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

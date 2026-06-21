@@ -1,4 +1,5 @@
 const InspectionStampsService = require('./inspection_stamps.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionStampsController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionStampsController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionStampsService.create(req.body);
+            notifyRole(4, `Nueva inspección de sellos requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

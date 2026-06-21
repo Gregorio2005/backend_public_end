@@ -1,4 +1,5 @@
 const InspectionOringService = require('./inspection_oring.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionOringController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionOringController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionOringService.create(req.body);
+            notifyRole(4, `Nueva inspección de o-ring requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

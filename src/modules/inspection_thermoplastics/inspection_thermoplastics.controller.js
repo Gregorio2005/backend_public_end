@@ -1,4 +1,5 @@
 const InspectionThermoplasticsService = require('./inspection_thermoplastics.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionThermoplasticsController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionThermoplasticsController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionThermoplasticsService.create(req.body);
+            notifyRole(4, `Nueva inspección termoplástica requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

@@ -10,15 +10,21 @@ const router = express.Router();
  */
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
+    let token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else {
+        // Fallback: permitir token en query string (necesario para window.open de CVs)
+        token = req.query.token;
+    }
+
+    if (!token) {
         return res.status(401).json({ 
             success: false, 
             message: 'Acceso denegado. Formato de token inválido o no proporcionado.' 
         });
     }
-
-    const token = authHeader.split(' ')[1];
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET);

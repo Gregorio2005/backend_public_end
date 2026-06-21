@@ -1,4 +1,5 @@
 const InspectionStuffingStampsDownspoutsService = require('./inspection_stuffing_stamps_downspouts.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionStuffingStampsDownspoutsController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,7 @@ const InspectionStuffingStampsDownspoutsController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionStuffingStampsDownspoutsService.create(req.body);
+            notifyRole(4, `Nueva inspección de empaquetadura requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

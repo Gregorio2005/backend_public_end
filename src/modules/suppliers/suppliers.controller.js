@@ -1,4 +1,5 @@
 const SuppliersService = require('./suppliers.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const SuppliersController = {
     getAll: async (req, res, next) => {
@@ -22,6 +23,8 @@ const SuppliersController = {
     create: async (req, res, next) => {
         try {
             const result = await SuppliersService.createSupplier(req.body);
+            // Notificar a Jefes de Calidad (rol 3)
+            notifyRole(3, `Nuevo proveedor registrado: ${result.name || 'Sin nombre'}`);
             res.status(201).json({ success: true, data: result });
         } catch (error) {
             next(error);

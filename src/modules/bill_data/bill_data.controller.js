@@ -1,4 +1,5 @@
 const BillDataService = require('./bill_data.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const BillDataController = {
     getAll: async (req, res, next) => {
@@ -22,6 +23,10 @@ const BillDataController = {
     create: async (req, res, next) => {
         try {
             const data = await BillDataService.create(req.body);
+            // Notificar a Trabajadores (rol 2) y Jefes de Calidad (rol 3)
+            const nro = data.bill_nro || data.id;
+            notifyRole(2, `Nueva factura #${nro} registrada en el sistema.`);
+            notifyRole(3, `Nueva factura #${nro} registrada en el sistema.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);

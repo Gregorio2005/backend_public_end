@@ -1,4 +1,5 @@
 const InspectionBagsService = require('./inspection_bags.service');
+const { notifyRole } = require('../../utils/notifications');
 
 const InspectionBagsController = {
     getAll: async (req, res, next) => {
@@ -20,6 +21,8 @@ const InspectionBagsController = {
     create: async (req, res, next) => {
         try {
             const data = await InspectionBagsService.create(req.body);
+            // Notificar a Jefes de Ingeniería (rol 4)
+            notifyRole(4, `Nueva inspección de bolsas requiere supervisión.`);
             res.status(201).json({ success: true, data });
         } catch (error) {
             next(error);
