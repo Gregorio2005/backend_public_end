@@ -1,4 +1,5 @@
 const InputsCardboardModel = require('./inputs_cardboard.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsCardboardService = {
     getAll: async () => {
@@ -13,9 +14,9 @@ const InputsCardboardService = {
         return await InputsCardboardModel.create(data);
     },
     update: async (id, data) => {
-        const result = await InputsCardboardModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+        const { newInput } = await createNewVersion('inputs_cardboard', 6, id, data);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
     delete: async (id) => {
         const result = await InputsCardboardModel.delete(id);

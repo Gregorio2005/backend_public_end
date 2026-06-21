@@ -1,4 +1,5 @@
 const InputsThermoplasticsModel = require('./inputs_thermoplastics.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsThermoplasticsService = {
     getAll: async () => {
@@ -16,7 +17,9 @@ const InputsThermoplasticsService = {
     },
 
     update: async (id, payload) => {
-        return await InputsThermoplasticsModel.update(id, payload);
+        const { newInput } = await createNewVersion('inputs_thermoplastics', 8, id, payload);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
 
     delete: async (id) => {

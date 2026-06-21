@@ -1,4 +1,5 @@
 const InputsCollarsModel = require('./inputs_collars.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsCollarsService = {
     getAll: async () => {
@@ -16,7 +17,9 @@ const InputsCollarsService = {
     },
 
     update: async (id, payload) => {
-        return await InputsCollarsModel.update(id, payload);
+        const { newInput } = await createNewVersion('inputs_collars', 10, id, payload);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
 
     delete: async (id) => {

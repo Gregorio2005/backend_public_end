@@ -3,8 +3,8 @@ const MasterInputsService = require('./master_inputs.service');
 const MasterInputsController = {
     getAll: async (req, res, next) => {
         try {
-            const { suppliers_id } = req.query; // Extrae suppliers_id de los parámetros de consulta
-            const data = await MasterInputsService.getAll(suppliers_id);
+            const { suppliers_id, status } = req.query;
+            const data = await MasterInputsService.getAll(suppliers_id, status);
             res.json({ success: true, data });
         } catch (error) {
             next(error);

@@ -1,4 +1,5 @@
 const InputsBagsModel = require('./inputs_bags.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsBagsService = {
     getAll: async () => {
@@ -13,9 +14,9 @@ const InputsBagsService = {
         return await InputsBagsModel.create(data);
     },
     update: async (id, data) => {
-        const result = await InputsBagsModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+        const { newInput } = await createNewVersion('inputs_bags', 5, id, data);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
     delete: async (id) => {
         const result = await InputsBagsModel.delete(id);

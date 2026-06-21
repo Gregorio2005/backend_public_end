@@ -1,8 +1,8 @@
 const MasterInputsModel = require('./master_inputs.model');
 
 const MasterInputsService = {
-    getAll: async (suppliers_id = null) => {
-        return await MasterInputsModel.findAll(suppliers_id);
+    getAll: async (suppliers_id = null, status = null) => {
+        return await MasterInputsModel.findAll(suppliers_id, status);
     },
 
     getById: async (id) => {

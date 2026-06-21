@@ -38,7 +38,29 @@ const TypeInputsModel = {
         if (!allowedTables.includes(tableName)) {
             throw new Error(`Tabla no válida: ${tableName}`);
         }
-        const { rows } = await pool.query(`SELECT * FROM public.${tableName} ORDER BY id ASC`);
+        const { rows } = await pool.query(`SELECT * FROM public."${tableName}" ORDER BY id ASC`);
+        return rows;
+    },
+
+    findVigenteInputsByTable: async (tableName, typeInputsId) => {
+        const allowedTables = [
+            'inputs_stuffing_stamps_downspouts', 'inputs_stamps', 'inputs_oring',
+            'inputs_chemicals', 'inputs_bags', 'inputs_cardboard',
+            'inputs_cases', 'inputs_thermoplastics', 'inputs_cameras', 'inputs_collars'
+        ];
+        if (!allowedTables.includes(tableName)) {
+            throw new Error(`Tabla no válida: ${tableName}`);
+        }
+        const { rows } = await pool.query(`
+            SELECT t.*, COALESCE(
+                (SELECT m.status::text FROM public.master_inputs m 
+                 WHERE m.inputs_id = t.id AND m.type_inputs_id = $1 
+                 ORDER BY m.id DESC LIMIT 1), 
+                'Sin estado'
+            ) AS master_status
+            FROM public."${tableName}" t
+            ORDER BY t.id ASC
+        `, [typeInputsId]);
         return rows;
     }
 };

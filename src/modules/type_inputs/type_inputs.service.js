@@ -37,7 +37,7 @@ const TypeInputsService = {
     getInputsByTypeId: async (id) => {
         const config = TYPE_CONFIG[id];
         if (!config) throw new Error(`No existe configuración de tabla para el tipo de insumo con ID ${id}`);
-        const inputs = await TypeInputsModel.findInputsByTable(config.table);
+        const inputs = await TypeInputsModel.findVigenteInputsByTable(config.table, id);
         return inputs.map(input => ({ ...input, type_inputs_id: id }));
     },
 

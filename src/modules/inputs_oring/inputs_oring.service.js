@@ -1,4 +1,5 @@
 const InputsOringModel = require('./inputs_oring.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsOringService = {
     getAll: async () => {
@@ -13,9 +14,9 @@ const InputsOringService = {
         return await InputsOringModel.create(data);
     },
     update: async (id, data) => {
-        const result = await InputsOringModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+        const { newInput } = await createNewVersion('inputs_oring', 3, id, data);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
     delete: async (id) => {
         const result = await InputsOringModel.delete(id);

@@ -1,4 +1,5 @@
 const InputsStuffingStampsDownspoutsModel = require('./inputs_stuffing_stamps_downspouts.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsStuffingStampsDownspoutsService = {
     getAll: async () => {
@@ -13,9 +14,9 @@ const InputsStuffingStampsDownspoutsService = {
         return await InputsStuffingStampsDownspoutsModel.create(data);
     },
     update: async (id, data) => {
-        const result = await InputsStuffingStampsDownspoutsModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+        const { newInput } = await createNewVersion('inputs_stuffing_stamps_downspouts', 1, id, data);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
     delete: async (id) => {
         const result = await InputsStuffingStampsDownspoutsModel.delete(id);

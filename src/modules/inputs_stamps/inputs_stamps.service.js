@@ -1,4 +1,5 @@
 const InputsStampsModel = require('./inputs_stamps.model');
+const { createNewVersion } = require('../../utils/versioning');
 
 const InputsStampsService = {
     getAll: async () => {
@@ -13,9 +14,9 @@ const InputsStampsService = {
         return await InputsStampsModel.create(data);
     },
     update: async (id, data) => {
-        const result = await InputsStampsModel.update(id, data);
-        if (!result) throw new Error('No se pudo actualizar: Insumo no encontrado');
-        return result;
+        const { newInput } = await createNewVersion('inputs_stamps', 2, id, data);
+        if (!newInput) throw new Error('No se pudo crear nueva version del insumo');
+        return newInput;
     },
     delete: async (id) => {
         const result = await InputsStampsModel.delete(id);

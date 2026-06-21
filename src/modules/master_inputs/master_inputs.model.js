@@ -1,10 +1,10 @@
 const pool = require('../../config/db');
 
 const MasterInputsModel = {
-    findAll: async (suppliers_id) => {
+    findAll: async (suppliers_id, status) => {
         // Realizamos JOINs con todas las tablas técnicas para obtener la 'reference' real del insumo.
         // Usamos COALESCE para capturar la referencia de la tabla que corresponda según el type_inputs_id.
-        const query = `
+        let query = `
             SELECT 
                 mi.*,
                 COALESCE(
@@ -21,14 +21,26 @@ const MasterInputsModel = {
             LEFT JOIN public.inputs_cases t7 ON mi.inputs_id = t7.id AND mi.type_inputs_id = 7
             LEFT JOIN public.inputs_thermoplastics t8 ON mi.inputs_id = t8.id AND mi.type_inputs_id = 8
             LEFT JOIN public.inputs_cameras t9 ON mi.inputs_id = t9.id AND mi.type_inputs_id = 9
-            LEFT JOIN public.inputs_collars t10 ON mi.inputs_id = t10.id AND mi.type_inputs_id = 10
-            ${suppliers_id ? 'WHERE mi.suppliers_id = $1' : ''}
-            ORDER BY mi.id ASC`;
+            LEFT JOIN public.inputs_collars t10 ON mi.inputs_id = t10.id AND mi.type_inputs_id = 10`;
 
-        let params = [];
+        const conditions = [];
+        const params = [];
+
         if (suppliers_id) {
             params.push(suppliers_id);
+            conditions.push(`mi.suppliers_id = $${params.length}`);
         }
+
+        if (status) {
+            params.push(status);
+            conditions.push(`mi.status = $${params.length}`);
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(' AND ')}`;
+        }
+
+        query += ` ORDER BY mi.id ASC`;
 
         const { rows } = await pool.query(query, params);
         return rows;
