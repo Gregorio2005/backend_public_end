@@ -61,6 +61,7 @@ const websiteNoticeRoutes = require('./src/auth/website_notice.routes'); // Nuev
 const inspectionStatsRoutes = require('./src/modules/inspection_stats/inspection_stats.routes');
 const manufacturingFlowRoutes = require('./src/modules/manufacturing_flow/manufacturing_flow.routes');
 const notificacionesRoutes = require('./src/modules/notifications/notifications.routes');
+const profilePhotoRoutes = require('./src/modules/profile_photo/profile_photo.routes');
 
 // Rutas Base
 app.get('/', (req, res) => {
@@ -103,6 +104,7 @@ app.use(`${API_PREFIX}/website-notice`, websiteNoticeRoutes); // Montaje de la n
 app.use(`${API_PREFIX}/inspection-stats`, inspectionStatsRoutes);
 app.use(`${API_PREFIX}/manufacturing-flow`, manufacturingFlowRoutes);
 app.use(`${API_PREFIX}/notificaciones`, notificacionesRoutes);
+app.use(`${API_PREFIX}/profile-photo`, profilePhotoRoutes);
 
 // Manejo de errores (Debe ir después de las rutas)
 app.use(errorHandler);

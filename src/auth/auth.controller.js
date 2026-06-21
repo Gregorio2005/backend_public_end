@@ -110,7 +110,7 @@ const AuthController = {
         try {
             // Obtenemos los datos del usuario actual (el ID viene del middleware de auth)
             const result = await pool.query(
-                'SELECT id, "user", name, lastname, email, roles_id, status FROM public.users WHERE id = $1',
+                'SELECT id, "user", name, lastname, email, roles_id, status, url_perfil_photo, photo_approved FROM public.users WHERE id = $1',
                 [req.user.id]
             );
             
@@ -163,7 +163,8 @@ const AuthController = {
     getProfile: async (req, res, next) => {
         try {
             const result = await pool.query(
-                `SELECT u.id, u."user", u.name, u.lastname, u.ci, u.email, r.name as role, u.status 
+                `SELECT u.id, u."user", u.name, u.lastname, u.ci, u.email, r.name as role, u.status,
+                        u.url_perfil_photo, u.photo_approved 
                  FROM public.users u
                  JOIN public.roles r ON u.roles_id = r.id
                  WHERE u.id = $1`,
