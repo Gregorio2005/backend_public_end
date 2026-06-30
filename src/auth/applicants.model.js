@@ -7,7 +7,7 @@ const ApplicantsModel = {
     findAll: async () => {
         try {
             const result = await pool.query(
-                `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_path,
+                `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_url,
                         status, interview_formal_date, interview_formal_result,
                         interview_medical_date, interview_medical_result, created_at
                  FROM public.postulantes ORDER BY id ASC`
@@ -24,7 +24,7 @@ const ApplicantsModel = {
     findById: async (id) => {
         try {
             const result = await pool.query(
-                `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_path,
+                `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_url,
                         status, interview_formal_date, interview_formal_result,
                         interview_medical_date, interview_medical_result, created_at
                  FROM public.postulantes WHERE id = $1`,
@@ -40,14 +40,14 @@ const ApplicantsModel = {
      * Inserta un nuevo postulante con los campos expandidos.
      */
     create: async (data) => {
-        const { name, lastname, ci, email, phone, birth_date, rol, cv_path } = data;
+        const { name, lastname, ci, email, phone, birth_date, rol, cv_url } = data;
         try {
             const result = await pool.query(
                 `INSERT INTO public.postulantes
-                    (name, lastname, ci, email, phone, birth_date, rol, cv_path, status)
+                    (name, lastname, ci, email, phone, birth_date, rol, cv_url, status)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                  RETURNING *`,
-                [name, lastname, ci, email, phone || null, birth_date || null, rol, cv_path || null, 'En revision']
+                [name, lastname, ci, email, phone || null, birth_date || null, rol, cv_url || null, 'En revision']
             );
             return result.rows[0];
         } catch (error) {

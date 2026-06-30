@@ -94,3 +94,6 @@ ALTER TABLE public.postulantes
 
 ALTER TABLE public.postulantes
     ALTER COLUMN interview_medical_result SET DEFAULT 'Pendiente';
+
+-- 13. Renombrar cv_path a cv_url (almacena URL de Cloudinary en vez de filename local)
+ALTER TABLE public.postulantes RENAME COLUMN cv_path TO cv_url;

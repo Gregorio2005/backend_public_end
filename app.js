@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const path = require('path');
 require('dotenv').config();
 
 const { API_PREFIX } = require('./src/config/envs');
@@ -22,9 +21,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
-
-// Servir archivos estáticos desde la carpeta uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const authRouter = require('./src/auth/auth.routes');
 const rolesRoutes = require('./src/modules/roles/roles.routes');

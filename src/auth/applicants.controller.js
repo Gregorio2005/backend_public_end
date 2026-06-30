@@ -1,6 +1,5 @@
 const ApplicantsModel = require('./applicants.model');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
 const {
     sendApplicationConfirmation,
     sendFormalInterviewDate,
@@ -91,10 +90,28 @@ const ApplicantsController = {
         try {
             const { name, lastname, ci, email, phone, birth_date, rol } = req.body;
 
-            const cv_path = req.file ? req.file.filename : null;
+            let cv_url = null;
+            if (req.file) {
+                const ciClean = (ci || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                const result = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: 'cvs',
+                            resource_type: 'raw',
+                            public_id: `${Date.now()}_${ciClean}`
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    stream.end(req.file.buffer);
+                });
+                cv_url = result.secure_url;
+            }
 
             const newApplicant = await ApplicantsModel.create({
-                name, lastname, ci, email, phone, birth_date, rol, cv_path
+                name, lastname, ci, email, phone, birth_date, rol, cv_url
             });
 
             // Enviar correo de confirmación de postulación
@@ -247,19 +264,19 @@ const ApplicantsController = {
             const { id } = req.params;
             const applicant = await ApplicantsModel.findById(id);
 
-            if (!applicant || !applicant.cv_path) {
+            if (!applicant || !applicant.cv_url) {
                 return res.status(404).json({ success: false, message: 'CV no disponible.' });
             }
 
-            const cvPath = path.join(__dirname, '../../uploads/cvs', applicant.cv_path);
-
-            if (!fs.existsSync(cvPath)) {
-                return res.status(404).json({ success: false, message: 'Archivo CV no encontrado en el servidor.' });
+            const response = await fetch(applicant.cv_url);
+            if (!response.ok) {
+                return res.status(404).json({ success: false, message: 'Archivo CV no encontrado en Cloudinary.' });
             }
 
+            const buffer = await response.arrayBuffer();
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `inline; filename="${applicant.ci}_CV.pdf"`);
-            fs.createReadStream(cvPath).pipe(res);
+            res.setHeader('Content-Disposition', 'inline');
+            res.send(Buffer.from(buffer));
         } catch (error) {
             next(error);
         }
@@ -273,10 +290,14 @@ const ApplicantsController = {
             const { id } = req.params;
             const applicant = await ApplicantsModel.findById(id);
 
-            if (applicant && applicant.cv_path) {
-                const cvPath = path.join(__dirname, '../../uploads/cvs', applicant.cv_path);
-                if (fs.existsSync(cvPath)) {
-                    fs.unlinkSync(cvPath);
+            if (applicant && applicant.cv_url) {
+                try {
+                    const parts = applicant.cv_url.split('/');
+                    const folderAndFile = parts.slice(parts.indexOf('cvs')).join('/');
+                    const publicId = folderAndFile.replace(/\.[^.]+$/, '');
+                    await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+                } catch (e) {
+                    console.error('Error al eliminar CV de Cloudinary:', e.message);
                 }
             }
 
