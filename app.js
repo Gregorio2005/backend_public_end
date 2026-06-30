@@ -7,14 +7,16 @@ const { API_PREFIX } = require('./src/config/envs');
 const errorHandler = require('./src/middleware/errorHandler');
 const app = express();
 
-// Configuración de CORS para habilitar la conexión con el frontend
+// Configuración de CORS para habilitar la conexión con el frontend y website
 const corsOptions = {
-    // El origen debe coincidir con la URL de tu frontend (ej: Vite suele usar 5173)
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: [
+        process.env.FRONTEND_URL,
+        process.env.WEBSITE_URL
+    ].filter(Boolean),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // Importante si en el futuro decides usar cookies o sesiones
-    optionsSuccessStatus: 200 // Para compatibilidad con navegadores antiguos
+    credentials: true,
+    optionsSuccessStatus: 200
 };
 
 // Aplicación de middlewares

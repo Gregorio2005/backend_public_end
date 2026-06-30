@@ -23,6 +23,7 @@ const envSchema = z.object({
     API_PREFIX: z.string().default('/api'),
     PROJECT_NAME: z.string().default('Gestión de Insumos API'),
     FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+    WEBSITE_URL: z.string().url().optional(),
     // Configuración de EmailJS
     EMAILJS_SERVICE_ID: z.string().min(1, "El Service ID de EmailJS es obligatorio"),
     EMAILJS_TEMPLATE_ID: z.string().min(1, "El Template ID de EmailJS es obligatorio"),
