@@ -10,6 +10,18 @@ const InspectionStatsController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  getQualityStats: async (req, res, next) => {
+    try {
+      const { suppliers_id, type_inputs_id, fechaInicio, fechaFin } = req.query;
+      const rows = await InspectionStatsModel.getQualityStats({ suppliers_id, type_inputs_id, fechaInicio, fechaFin });
+      const stats = { Aprobado: 0, Observacion: 0, Rechazado: 0, Incompleta: 0 };
+      rows.forEach(row => { stats[row.status] = parseInt(row.count, 10); });
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 
