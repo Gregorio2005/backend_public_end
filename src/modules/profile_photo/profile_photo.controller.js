@@ -92,8 +92,9 @@ const ProfilePhotoController = {
      */
     getPendingPhotos: async (req, res, next) => {
         try {
-            const data = await ProfilePhotoService.getPendingPhotos();
-            res.json({ success: true, data });
+            const { page, limit } = req.query;
+            const result = await ProfilePhotoService.getPendingPhotos({ page, limit });
+            res.json({ success: true, ...result });
         } catch (error) {
             next(error);
         }

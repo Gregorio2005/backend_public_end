@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const { paginate } = require('../../utils/pagination');
 
 const ProfilePhotoModel = {
     getPhotoStatus: async (userId) => {
@@ -42,16 +43,17 @@ const ProfilePhotoModel = {
         return rows[0];
     },
 
-    getPendingPhotos: async () => {
-        const { rows } = await pool.query(
+    getPendingPhotos: async (params = {}) => {
+        return await paginate(
             `SELECT u.id, u.name, u.lastname, u.url_perfil_photo, u.photo_approved, u.update_at,
                     r.name AS role_name
              FROM public.users u
              LEFT JOIN public.roles r ON u.roles_id = r.id
              WHERE u.url_perfil_photo IS NOT NULL AND u.photo_approved = FALSE
-             ORDER BY u.update_at DESC`
+             ORDER BY u.update_at DESC`,
+            [],
+            params
         );
-        return rows;
     }
 };
 

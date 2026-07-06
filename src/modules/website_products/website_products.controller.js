@@ -13,8 +13,9 @@ const WebsiteProductsController = {
 
     getAll: async (req, res, next) => {
         try {
-            const data = await WebsiteProductsService.getAll();
-            res.json({ success: true, data });
+            const { page, limit } = req.query;
+            const result = await WebsiteProductsService.getAll({ page, limit });
+            res.json({ success: true, ...result });
         } catch (error) {
             next(error);
         }

@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const { paginate } = require('../../utils/pagination');
 
 const WebsiteProductsModel = {
     findActive: async () => {
@@ -7,10 +8,8 @@ const WebsiteProductsModel = {
         return rows;
     },
 
-    findAll: async () => {
-        const query = 'SELECT * FROM public.website_products ORDER BY display_order ASC';
-        const { rows } = await pool.query(query);
-        return rows;
+    findAll: async (params = {}) => {
+        return await paginate('SELECT * FROM public.website_products ORDER BY display_order ASC', [], params);
     },
 
     findById: async (id) => {

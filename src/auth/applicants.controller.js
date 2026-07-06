@@ -54,10 +54,11 @@ const ApplicantsController = {
      */
     getAllApplicants: async (req, res, next) => {
         try {
-            const applicants = await ApplicantsModel.findAll();
+            const { page, limit } = req.query;
+            const result = await ApplicantsModel.findAll({ page, limit });
             res.status(200).json({
                 success: true,
-                data: applicants,
+                ...result,
                 message: 'Lista de postulantes obtenida con éxito.'
             });
         } catch (error) {

@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { paginate } = require('../utils/pagination');
 
 const WebsiteNoticeModel = {
     /**
@@ -23,13 +24,13 @@ const WebsiteNoticeModel = {
      * Obtiene todos los avisos de la tabla 'mensajes_web'.
      * @returns {Promise<Array>} Lista de avisos.
      */
-    getAll: async () => {
+    getAll: async (params = {}) => {
         try {
-            // Ordenamos por status DESC para que el mensaje activo sea siempre el primero
-            const result = await pool.query(
-                'SELECT id, name, note, status FROM public.mensajes_web ORDER BY status DESC, id DESC'
+            return await paginate(
+                'SELECT id, name, note, status FROM public.mensajes_web ORDER BY status DESC, id DESC',
+                [],
+                params
             );
-            return result.rows;
         } catch (error) {
             throw new Error(`Error al obtener los avisos web: ${error.message}`);
         }

@@ -5,7 +5,7 @@ const MAX_SLOTS = 6;
 const WebsiteProductsService = {
     getActive: () => WebsiteProductsModel.findActive(),
 
-    getAll: () => WebsiteProductsModel.findAll(),
+    getAll: (params) => WebsiteProductsModel.findAll(params),
 
     getById: async (id) => {
         const product = await WebsiteProductsModel.findById(id);

@@ -25,10 +25,11 @@ const WebsiteNoticeController = {
      */
     getNotices: async (req, res, next) => {
         try {
-            const notices = await WebsiteNoticeModel.getAll();
+            const { page, limit } = req.query;
+            const result = await WebsiteNoticeModel.getAll({ page, limit });
             res.status(200).json({
                 success: true,
-                data: notices,
+                ...result,
             });
         } catch (error) {
             next(error);

@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs');
 const pool = require('../../config/db');
 
 const UsersService = {
-    getAllUsers: async () => {
-        return await UsersModel.findAll();
+    getAllUsers: async (params) => {
+        return await UsersModel.findAll(params);
     },
 
     getUserById: async (id) => {

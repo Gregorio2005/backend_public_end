@@ -1,18 +1,23 @@
 const pool = require('../config/db');
+const { paginate } = require('../utils/pagination');
+
+const BASE_SELECT = `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_url,
+                            status, interview_formal_date, interview_formal_result,
+                            interview_medical_date, interview_medical_result, created_at
+                     FROM public.postulantes`;
 
 const ApplicantsModel = {
-    /**
-     * Obtiene todos los postulantes con todas sus columnas.
-     */
-    findAll: async () => {
+    findAll: async (params = {}) => {
         try {
-            const result = await pool.query(
-                `SELECT id, name, lastname, ci, email, phone, birth_date, rol, cv_url,
-                        status, interview_formal_date, interview_formal_result,
-                        interview_medical_date, interview_medical_result, created_at
-                 FROM public.postulantes ORDER BY id ASC`
-            );
-            return result.rows;
+            const statusOrder = `CASE status
+                WHEN 'En revision' THEN 1
+                WHEN 'Pendiente' THEN 2
+                WHEN 'Aprobado' THEN 3
+                WHEN 'Contratado' THEN 4
+                WHEN 'Rechazado' THEN 5
+                WHEN 'Descartado' THEN 6
+                ELSE 7 END`;
+            return await paginate(`${BASE_SELECT} ORDER BY ${statusOrder} ASC, id ASC`, [], params);
         } catch (error) {
             throw new Error(`Error al obtener postulantes desde la base de datos: ${error.message}`);
         }

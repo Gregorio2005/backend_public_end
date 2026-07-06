@@ -13,7 +13,7 @@ const ProfilePhotoService = {
         if (!result) throw new Error('Usuario no encontrado');
         return result;
     },
-    getPendingPhotos: () => ProfilePhotoModel.getPendingPhotos()
+    getPendingPhotos: (params) => ProfilePhotoModel.getPendingPhotos(params)
 };
 
 module.exports = ProfilePhotoService;

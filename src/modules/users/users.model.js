@@ -1,10 +1,11 @@
 const pool = require('../../config/db');
+const { paginate } = require('../../utils/pagination');
+
+const BASE_SELECT = 'SELECT id, "user", name, lastname, ci, email, roles_id, status, created_at FROM public.users';
 
 const UsersModel = {
-    findAll: async () => {
-        const query = 'SELECT id, "user", name, lastname, ci, email, roles_id, status, created_at FROM public.users ORDER BY id ASC';
-        const { rows } = await pool.query(query);
-        return rows;
+    findAll: async (params = {}) => {
+        return await paginate(`${BASE_SELECT} ORDER BY roles_id ASC, id ASC`, [], params);
     },
 
     findById: async (id) => {
