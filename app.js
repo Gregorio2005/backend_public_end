@@ -60,6 +60,7 @@ const inspectionStatsRoutes = require('./src/modules/inspection_stats/inspection
 const manufacturingFlowRoutes = require('./src/modules/manufacturing_flow/manufacturing_flow.routes');
 const notificacionesRoutes = require('./src/modules/notifications/notifications.routes');
 const profilePhotoRoutes = require('./src/modules/profile_photo/profile_photo.routes');
+const websiteProductsRoutes = require('./src/modules/website_products/website_products.routes');
 
 // Rutas Base
 app.get('/', (req, res) => {
@@ -103,6 +104,7 @@ app.use(`${API_PREFIX}/inspection-stats`, inspectionStatsRoutes);
 app.use(`${API_PREFIX}/manufacturing-flow`, manufacturingFlowRoutes);
 app.use(`${API_PREFIX}/notificaciones`, notificacionesRoutes);
 app.use(`${API_PREFIX}/profile-photo`, profilePhotoRoutes);
+app.use(`${API_PREFIX}/website-products`, websiteProductsRoutes);
 
 // Manejo de errores (Debe ir después de las rutas)
 app.use(errorHandler);
