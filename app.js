@@ -55,6 +55,7 @@ const inspectionThermoplasticsRoutes = require('./src/modules/inspection_thermop
 const applicantsRoutes = require('./src/auth/applicants.routes');
 const reportsApprovedRoutes = require('./src/modules/reports_approved/reports_approved.routes');
 const reportsRefusedRoutes = require('./src/modules/reports_refused/reports_refused.routes');
+const reportPdfRoutes = require('./src/modules/report_pdf/report_pdf.routes');
 const websiteNoticeRoutes = require('./src/auth/website_notice.routes'); // Nueva importación
 const inspectionStatsRoutes = require('./src/modules/inspection_stats/inspection_stats.routes');
 const manufacturingFlowRoutes = require('./src/modules/manufacturing_flow/manufacturing_flow.routes');
@@ -99,6 +100,7 @@ app.use(`${API_PREFIX}/inspection-thermoplastics`, inspectionThermoplasticsRoute
 app.use(`${API_PREFIX}/applicants`, applicantsRoutes);
 app.use(`${API_PREFIX}/reports-approved`, reportsApprovedRoutes);
 app.use(`${API_PREFIX}/reports-refused`, reportsRefusedRoutes);
+app.use(`${API_PREFIX}/report-pdf`, reportPdfRoutes);
 app.use(`${API_PREFIX}/website-notice`, websiteNoticeRoutes); // Montaje de la nueva ruta
 app.use(`${API_PREFIX}/inspection-stats`, inspectionStatsRoutes);
 app.use(`${API_PREFIX}/manufacturing-flow`, manufacturingFlowRoutes);

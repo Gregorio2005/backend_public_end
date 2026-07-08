@@ -47,6 +47,16 @@ const ReportsRefusedController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    increment: async (req, res, next) => {
+        try {
+            const { bill_data_id, quantity, rejection_reason } = req.body;
+            const data = await ReportsRefusedService.incrementQuantity(bill_data_id, quantity, rejection_reason);
+            res.json({ success: true, data });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

@@ -14,4 +14,12 @@ const reportsRefusedSchema = z.object({
     }),
 });
 
-module.exports = { reportsRefusedSchema };
+const reportsRefusedIncrementSchema = z.object({
+    body: z.object({
+        bill_data_id: z.number().int().positive(),
+        quantity: z.number().int().positive("La cantidad debe ser un entero positivo"),
+        rejection_reason: z.string().optional(),
+    }),
+});
+
+module.exports = { reportsRefusedSchema, reportsRefusedIncrementSchema };

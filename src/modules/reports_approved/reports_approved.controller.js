@@ -44,6 +44,16 @@ const ReportsApprovedController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    increment: async (req, res, next) => {
+        try {
+            const { bill_data_id, quantity } = req.body;
+            const data = await ReportsApprovedService.incrementQuantity(bill_data_id, quantity);
+            res.json({ success: true, data });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

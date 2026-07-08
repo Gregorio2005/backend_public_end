@@ -25,6 +25,10 @@ const ReportsApprovedService = {
         const result = await ReportsApprovedModel.delete(id);
         if (!result) throw new Error('No se pudo eliminar: Reporte no encontrado');
         return result;
+    },
+
+    incrementQuantity: async (billDataId, quantity) => {
+        return await ReportsApprovedModel.incrementQuantity(billDataId, quantity);
     }
 };
 

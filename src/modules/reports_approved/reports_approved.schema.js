@@ -10,4 +10,11 @@ const reportsApprovedSchema = z.object({
     }),
 });
 
-module.exports = { reportsApprovedSchema };
+const reportsApprovedIncrementSchema = z.object({
+    body: z.object({
+        bill_data_id: z.number().int().positive("El ID de factura debe ser un número válido"),
+        quantity: z.number().int().positive("La cantidad debe ser un entero positivo"),
+    }),
+});
+
+module.exports = { reportsApprovedSchema, reportsApprovedIncrementSchema };

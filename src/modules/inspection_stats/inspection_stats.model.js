@@ -16,12 +16,16 @@ const INSPECTION_TABLES = [
 const InspectionStatsModel = {
   getStatusCounts: async () => {
     const unionQuery = INSPECTION_TABLES
-      .map(table => `SELECT status, observation FROM public.${table}`)
+      .map(table => `SELECT bill_inputs_id, status FROM public.${table}`)
       .join(' UNION ALL ');
 
     const query = `
       SELECT status, COUNT(*) as count
-      FROM (${unionQuery}) AS all_inspections
+      FROM (
+        SELECT DISTINCT ON (bill_inputs_id) bill_inputs_id, status
+        FROM (${unionQuery}) AS all_inspections
+        ORDER BY bill_inputs_id DESC
+      ) AS latest_inspections
       GROUP BY status
     `;
 

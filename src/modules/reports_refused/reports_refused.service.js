@@ -30,6 +30,10 @@ const ReportsRefusedService = {
         const result = await ReportsRefusedModel.delete(id);
         if (!result) throw new Error('No se pudo eliminar: Reporte no encontrado');
         return result;
+    },
+
+    incrementQuantity: async (billDataId, quantity, rejectionReason = null) => {
+        return await ReportsRefusedModel.incrementQuantity(billDataId, quantity, rejectionReason);
     }
 };
 
