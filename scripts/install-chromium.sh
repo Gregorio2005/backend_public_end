@@ -6,7 +6,7 @@ echo "Instalando dependencias del sistema para Chromium..."
 
 apt-get update
 apt-get install -y \
-  chromium \
+  chromium-browser \
   fonts-liberation \
   libappindicator3-1 \
   libasound2 \

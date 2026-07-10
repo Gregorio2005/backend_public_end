@@ -11,8 +11,18 @@ const ReportPdfController = {
 
             let browser;
             try {
+                const isRender = process.env.RENDER === 'true';
                 browser = await puppeteer.launch({
                     headless: 'new',
+                    ...(isRender && {
+                        executablePath: '/usr/bin/chromium-browser',
+                        args: [
+                            '--no-sandbox',
+                            '--disable-setuid-sandbox',
+                            '--disable-dev-shm-usage',
+                            '--disable-gpu'
+                        ]
+                    })
                 });
                 const page = await browser.newPage();
                 await page.setContent(html, { waitUntil: 'networkidle0' });

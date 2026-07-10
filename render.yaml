@@ -8,5 +8,5 @@ services:
       - key: NODE_ENV
         value: production
       - key: PUPPETEER_SKIP_DOWNLOAD
-        value: "false"
+        value: "true"
     preDeployCommand: bash scripts/install-chromium.sh
