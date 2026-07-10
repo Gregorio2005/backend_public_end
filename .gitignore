@@ -20,3 +20,7 @@ yarn-error.log*
 
 # CVS
 uploads
+
+# Archivos de prueba y dumps
+*.pdf
+*.sql

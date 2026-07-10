@@ -1,5 +1,5 @@
 const ReportPdfService = require('./report_pdf.service');
-const puppeteer = require('puppeteer');
+const { convertHtmlToPdf } = require('html2pdfsmith');
 
 const ReportPdfController = {
     generatePdf: async (req, res, next) => {
@@ -9,41 +9,13 @@ const ReportPdfController = {
 
             const html = buildReportHtml(data);
 
-            let browser;
-            try {
-                const isRender = process.env.RENDER === 'true';
-                browser = await puppeteer.launch({
-                    headless: 'new',
-                    ...(isRender && {
-                        executablePath: '/usr/bin/chromium-browser',
-                        args: [
-                            '--no-sandbox',
-                            '--disable-setuid-sandbox',
-                            '--disable-dev-shm-usage',
-                            '--disable-gpu'
-                        ]
-                    })
-                });
-                const page = await browser.newPage();
-                await page.setContent(html, { waitUntil: 'networkidle0' });
-                await page.waitForSelector('.report-container', { timeout: 10000 });
+            const pdfBuffer = await convertHtmlToPdf({ htmlContent: html, hideHeader: true });
 
-                const pdfBuffer = await page.pdf({
-                    format: 'A4',
-                    printBackground: true,
-                    margin: { top: '15mm', bottom: '15mm', left: '12mm', right: '12mm' }
-                });
-
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `attachment; filename="reporte-factura-${bill_data_id}.pdf"`);
-                res.end(pdfBuffer);
-            } catch (pdfError) {
-                console.error("Error generando PDF con Puppeteer:", pdfError);
-                throw new Error('No se pudo generar el PDF. Verifique que Puppeteer esté correctamente instalado.');
-            } finally {
-                if (browser) await browser.close();
-            }
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="reporte-factura-${bill_data_id}.pdf"`);
+            res.end(pdfBuffer);
         } catch (error) {
+            console.error("Error generando PDF:", error);
             next(error);
         }
     }
@@ -56,36 +28,36 @@ function buildReportHtml(data) {
     const billInputsRows = billInputs.length > 0
         ? billInputs.map((input, i) => `
             <tr>
-                <td>${i + 1}</td>
-                <td>${input.type_name || 'N/A'}</td>
-                <td>${input.reference || 'N/A'}</td>
-                <td>${input.oem_number || 'N/A'}</td>
-                <td style="text-align:right">${Number(input.quantity || 0).toFixed(2)}</td>
-                <td style="text-align:right">${Number(input.quantity_inspection || 0)}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${i + 1}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${input.type_name || 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${input.reference || 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${input.oem_number || 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937; text-align:right;">${Number(input.quantity || 0).toFixed(2)}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937; text-align:right;">${Number(input.quantity_inspection || 0)}</td>
             </tr>
         `).join('')
-        : '<tr><td colspan="6" style="text-align:center;color:#999;">No hay insumos registrados</td></tr>';
+        : '<tr><td colspan="6" style="padding:12px; text-align:center; color:#9ca3af; font-size:10px;">No hay insumos registrados</td></tr>';
 
     const approvedRows = reportsApproved.length > 0
         ? reportsApproved.map((r, i) => `
             <tr>
-                <td>${i + 1}</td>
-                <td style="text-align:right">${Number(r.approved_quantity).toFixed(4)}</td>
-                <td>${r.generated_at ? new Date(r.generated_at).toLocaleDateString('es-VE') : 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${i + 1}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#166534; font-weight:600; text-align:right;">${Number(r.approved_quantity).toFixed(4)}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${r.generated_at ? new Date(r.generated_at).toLocaleDateString('es-VE') : 'N/A'}</td>
             </tr>
         `).join('')
-        : '<tr><td colspan="3" style="text-align:center;color:#999;">No hay reportes de aprobaci&oacute;n</td></tr>';
+        : '<tr><td colspan="3" style="padding:12px; text-align:center; color:#9ca3af; font-size:10px;">No hay reportes de aprobaci&oacute;n</td></tr>';
 
     const refusedRows = reportsRefused.length > 0
         ? reportsRefused.map((r, i) => `
             <tr>
-                <td>${i + 1}</td>
-                <td style="text-align:right">${Number(r.claim_quantity).toFixed(4)}</td>
-                <td>${r.claim_date ? new Date(r.claim_date).toLocaleDateString('es-VE') : 'N/A'}</td>
-                <td>${r.rejection_reason || 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${i + 1}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#991b1b; font-weight:600; text-align:right;">${Number(r.claim_quantity).toFixed(4)}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${r.claim_date ? new Date(r.claim_date).toLocaleDateString('es-VE') : 'N/A'}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb; font-size:10px; color:#1f2937;">${r.rejection_reason || 'N/A'}</td>
             </tr>
         `).join('')
-        : '<tr><td colspan="4" style="text-align:center;color:#999;">No hay reportes de rechazo</td></tr>';
+        : '<tr><td colspan="4" style="padding:12px; text-align:center; color:#9ca3af; font-size:10px;">No hay reportes de rechazo</td></tr>';
 
     const approvedWidth = summary.totalApproved + summary.totalRefused > 0
         ? (summary.totalApproved / (summary.totalApproved + summary.totalRefused) * 100).toFixed(1)
@@ -98,152 +70,216 @@ function buildReportHtml(data) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Inspecci&oacute;n - Factura ${billData.bill_nro || billData.id}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a2e; font-size: 11px; }
-        .report-container { padding: 20px; }
-        
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 3px solid #a8000c; padding-bottom: 16px; }
-        .header-left h1 { font-size: 20px; color: #a8000c; margin-bottom: 4px; }
-        .header-left p { font-size: 11px; color: #666; }
-        .header-right { text-align: right; font-size: 10px; color: #666; }
-        
-        .section { margin-bottom: 20px; }
-        .section-title { font-size: 13px; font-weight: 700; color: #a8000c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid #e0e0e0; }
-        
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 20px; margin-bottom: 16px; }
-        .info-item label { display: block; font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.3px; }
-        .info-item span { font-size: 11px; font-weight: 600; color: #1a1a2e; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-        th { background-color: #f5f5f5; padding: 8px 10px; text-align: left; font-size: 9px; text-transform: uppercase; color: #666; letter-spacing: 0.3px; border-bottom: 2px solid #ddd; }
-        td { padding: 7px 10px; border-bottom: 1px solid #eee; font-size: 10px; }
-        
-        .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-        .summary-card { padding: 14px; border-radius: 6px; border: 1px solid #e0e0e0; }
-        .summary-card.approved { background-color: #f0fdf4; border-left: 4px solid #10b981; }
-        .summary-card.refused { background-color: #fef2f2; border-left: 4px solid #ef4444; }
-        .summary-card h4 { font-size: 11px; color: #666; margin-bottom: 4px; }
-        .summary-card .value { font-size: 22px; font-weight: 700; }
-        .summary-card.approved .value { color: #10b981; }
-        .summary-card.refused .value { color: #ef4444; }
-        
-        .bar-chart { margin: 12px 0; }
-        .bar-container { display: flex; height: 20px; border-radius: 4px; overflow: hidden; background: #f0f0f0; }
-        .bar-approved { background: #10b981; transition: width 0.3s; }
-        .bar-refused { background: #ef4444; transition: width 0.3s; }
-        .bar-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 10px; color: #666; }
-        .bar-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
-        .bar-legend .approved::before { background: #10b981; }
-        .bar-legend .refused::before { background: #ef4444; }
-        
-        .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 9px; color: #999; }
-    </style>
 </head>
-<body>
-    <div class="report-container">
-        <div class="header">
-            <div class="header-left">
-                <h1>Reporte de Inspecci&oacute;n</h1>
-                <p>Factura: <strong>${billData.bill_nro || 'Sin n&uacute;mero'}</strong></p>
-            </div>
-            <div class="header-right">
-                <p>Fecha de generaci&oacute;n: ${today}</p>
-                <p>ID: #${billData.id}</p>
-            </div>
-        </div>
+<body style="font-family: Arial, Helvetica, sans-serif; color: #1f2937; font-size: 11px; margin: 0; padding: 24px; background: #ffffff;">
+    <!-- ENCABEZADO -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px; border-bottom:4px solid #9b1c1c;">
+        <tr>
+            <td style="padding-bottom:20px; width:55%;">
+                <h1 style="font-size:22px; color:#9b1c1c; margin:0 0 6px 0; font-weight:700;">Reporte de Inspecci&oacute;n</h1>
+                <p style="font-size:12px; color:#6b7280; margin:0;">Factura: <strong style="color:#1f2937;">${billData.bill_nro || 'Sin n&uacute;mero'}</strong></p>
+            </td>
+            <td style="text-align:right; font-size:10px; color:#6b7280; padding-bottom:20px; width:45%; white-space:nowrap;">
+                <p style="margin:0 0 4px 0;">Fecha de generaci&oacute;n: <strong style="color:#1f2937;">${today}</strong></p>
+                <p style="margin:0;">ID: <strong style="color:#1f2937;">#${billData.id}</strong></p>
+            </td>
+        </tr>
+    </table>
 
-        <div class="section">
-            <div class="section-title">Datos de la Factura</div>
-            <div class="info-grid">
-                <div class="info-item"><label>N&uacute;mero de Factura</label><span>${billData.bill_nro || 'N/A'}</span></div>
-                <div class="info-item"><label>C&oacute;digo Odoo</label><span>${billData.odoo || 'N/A'}</span></div>
-                <div class="info-item"><label>Fecha de Facturaci&oacute;n</label><span>${billData.billing_date ? new Date(billData.billing_date).toLocaleDateString('es-VE') : 'N/A'}</span></div>
-                <div class="info-item"><label>N&uacute;mero de Expediente</label><span>${billData.nro_exp || 'N/A'}</span></div>
-                <div class="info-item"><label>N&uacute;mero de Recepci&oacute;n</label><span>${billData.nro_reception || 'N/A'}</span></div>
-                <div class="info-item"><label>Fecha de Recepci&oacute;n</label><span>${billData.receipt_date ? new Date(billData.receipt_date).toLocaleDateString('es-VE') : 'N/A'}</span></div>
-                <div class="info-item"><label>Proveedor</label><span>${billData.supplier_name || 'N/A'}</span></div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Insumos Asociados</div>
-            <table>
-                <thead>
+    <!-- DATOS DE LA FACTURA -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+            <td style="padding:10px 14px; background-color:#fff5f5; border-left:4px solid #9b1c1c; font-size:12px; font-weight:700; color:#9b1c1c; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
+                Datos de la Factura
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:12px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                        <th>#</th>
-                        <th>Tipo</th>
-                        <th>Referencia</th>
-                        <th>OEM</th>
-                        <th style="text-align:right">Cantidad</th>
-                        <th style="text-align:right">Cant. Inspeccionar</th>
+                        <td style="padding:6px 0; width:33%; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">N&uacute;mero de Factura</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.bill_nro || 'N/A'}</span>
+                        </td>
+                        <td style="padding:6px 0; width:33%; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">C&oacute;digo Odoo</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.odoo || 'N/A'}</span>
+                        </td>
+                        <td style="padding:6px 0; width:33%; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">Fecha de Facturaci&oacute;n</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.billing_date ? new Date(billData.billing_date).toLocaleDateString('es-VE') : 'N/A'}</span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>${billInputsRows}</tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Resumen de Calidad</div>
-            <div class="summary-cards">
-                <div class="summary-card approved">
-                    <h4>Aprobados</h4>
-                    <div class="value">${summary.totalApproved}</div>
-                    <span style="font-size:10px;color:#666;">${summary.approvedRecords} registro(s)</span>
-                </div>
-                <div class="summary-card refused">
-                    <h4>Rechazados</h4>
-                    <div class="value">${summary.totalRefused}</div>
-                    <span style="font-size:10px;color:#666;">${summary.refusedRecords} registro(s)</span>
-                </div>
-            </div>
-            <div class="bar-chart">
-                <div class="bar-container">
-                    <div class="bar-approved" style="width:${approvedWidth}%"></div>
-                    <div class="bar-refused" style="width:${refusedWidth}%"></div>
-                </div>
-                <div class="bar-legend">
-                    <span class="approved">Aprobado (${approvedWidth}%)</span>
-                    <span class="refused">Rechazado (${refusedWidth}%)</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Reporte de Aprobaci&oacute;n</div>
-            <table>
-                <thead>
                     <tr>
-                        <th>#</th>
-                        <th style="text-align:right">Cantidad Aprobada</th>
-                        <th>Fecha</th>
+                        <td style="padding:6px 0; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">N&uacute;mero de Expediente</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.nro_exp || 'N/A'}</span>
+                        </td>
+                        <td style="padding:6px 0; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">N&uacute;mero de Recepci&oacute;n</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.nro_reception || 'N/A'}</span>
+                        </td>
+                        <td style="padding:6px 0; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">Fecha de Recepci&oacute;n</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.receipt_date ? new Date(billData.receipt_date).toLocaleDateString('es-VE') : 'N/A'}</span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>${approvedRows}</tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Reporte de Rechazo</div>
-            <table>
-                <thead>
                     <tr>
-                        <th>#</th>
-                        <th style="text-align:right">Cantidad Rechazada</th>
-                        <th>Fecha del Reclamo</th>
-                        <th>Motivo</th>
+                        <td colspan="2" style="padding:6px 0; vertical-align:top;">
+                            <label style="display:block; font-size:9px; color:#6b7280; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:2px;">Proveedor</label>
+                            <span style="font-size:11px; font-weight:600; color:#1f2937;">${billData.supplier_name || 'N/A'}</span>
+                        </td>
+                        <td></td>
                     </tr>
-                </thead>
-                <tbody>${refusedRows}</tbody>
-            </table>
-        </div>
+                </table>
+            </td>
+        </tr>
+    </table>
 
-        <div class="footer">
-            <p>Sealing Products C.A. &mdash; Sistema de Gesti&oacute;n de Insumos e Inspecciones</p>
-            <p>Documento generado autom&aacute;ticamente el ${today}</p>
-        </div>
-    </div>
+    <!-- INSUMOS ASOCIADOS -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+            <td style="padding:10px 14px; background-color:#fff5f5; border-left:4px solid #9b1c1c; font-size:12px; font-weight:700; color:#9b1c1c; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">
+                Insumos Asociados
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top:8px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">#</th>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Tipo</th>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Referencia</th>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">OEM</th>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:right; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Cantidad</th>
+                            <th style="background-color:#fff5f5; padding:10px; text-align:right; font-size:9px; text-transform:uppercase; color:#9b1c1c; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Cant. Inspeccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody>${billInputsRows}</tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- RESUMEN DE CALIDAD -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+            <td style="padding:10px 14px; background-color:#fff5f5; border-left:4px solid #9b1c1c; font-size:12px; font-weight:700; color:#9b1c1c; text-transform:uppercase; letter-spacing:0.5px;">
+                Resumen de Calidad
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:16px 8px;">
+                <!-- TARJETAS DE RESUMEN -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+                    <tr>
+                        <td style="padding:20px; background-color:#f0fdf4; border:2px solid #bbf7d0; border-left:6px solid #166534; width:48%; vertical-align:top;">
+                            <p style="font-size:10px; color:#166534; text-transform:uppercase; font-weight:700; margin:0 0 8px 0; letter-spacing:0.5px;">Aprobados</p>
+                            <p style="font-size:32px; font-weight:700; color:#166534; margin:0; line-height:1;">${summary.totalApproved}</p>
+                        </td>
+                        <td style="width:4%;"></td>
+                        <td style="padding:20px; background-color:#fef2f2; border:2px solid #fecaca; border-left:6px solid #991b1b; width:48%; vertical-align:top;">
+                            <p style="font-size:10px; color:#991b1b; text-transform:uppercase; font-weight:700; margin:0 0 8px 0; letter-spacing:0.5px;">Rechazados</p>
+                            <p style="font-size:32px; font-weight:700; color:#991b1b; margin:0; line-height:1;">${summary.totalRefused}</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- TABLA COMPARATIVA (reemplaza la grafica de barras) -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb; border-radius:4px;">
+                    <tr>
+                        <td style="padding:12px 16px; background-color:#f9fafb; border-bottom:1px solid #e5e7eb;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="font-size:10px; color:#6b7280;">Porcentaje de Aprobaci&oacute;n</td>
+                                    <td style="font-size:14px; font-weight:700; color:#166534; text-align:right;">${approvedWidth}%</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 16px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="font-size:10px; color:#6b7280;">Porcentaje de Rechazo</td>
+                                    <td style="font-size:14px; font-weight:700; color:#991b1b; text-align:right;">${refusedWidth}%</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- REPORTE DE APROBACION -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+            <td style="padding:10px 14px; background-color:#f0fdf4; border-left:4px solid #166534; font-size:12px; font-weight:700; color:#166534; text-transform:uppercase; letter-spacing:0.5px;">
+                Reporte de Aprobaci&oacute;n
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:8px 14px; background-color:#f0fdf4; border-left:4px solid #166534; font-size:10px; font-weight:700; color:#166534; text-transform:uppercase; letter-spacing:0.3px;">
+                Cantidad de Insumos Aprobados
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:12px 8px 8px 8px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background-color:#f0fdf4; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#166534; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #bbf7d0;">#</th>
+                            <th style="background-color:#f0fdf4; padding:10px; text-align:right; font-size:9px; text-transform:uppercase; color:#166534; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #bbf7d0;">Cantidad Aprobada</th>
+                            <th style="background-color:#f0fdf4; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#166534; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #bbf7d0;">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>${approvedRows}</tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- REPORTE DE RECHAZO -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+        <tr>
+            <td style="padding:10px 14px; background-color:#fef2f2; border-left:4px solid #991b1b; font-size:12px; font-weight:700; color:#991b1b; text-transform:uppercase; letter-spacing:0.5px;">
+                Reporte de Rechazo
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:8px 14px; background-color:#fef2f2; border-left:4px solid #991b1b; font-size:10px; font-weight:700; color:#991b1b; text-transform:uppercase; letter-spacing:0.3px;">
+                Cantidad de Insumos Rechazados
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:12px 8px 8px 8px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background-color:#fef2f2; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#991b1b; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">#</th>
+                            <th style="background-color:#fef2f2; padding:10px; text-align:right; font-size:9px; text-transform:uppercase; color:#991b1b; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Cantidad Rechazada</th>
+                            <th style="background-color:#fef2f2; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#991b1b; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Fecha del Reclamo</th>
+                            <th style="background-color:#fef2f2; padding:10px; text-align:left; font-size:9px; text-transform:uppercase; color:#991b1b; font-weight:700; letter-spacing:0.3px; border-bottom:2px solid #fecaca;">Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>${refusedRows}</tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- PIE DE PAGINA -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:32px; border-top:2px solid #e5e7eb;">
+        <tr>
+            <td style="padding:16px; text-align:center; background-color:#f9fafb;">
+                <p style="font-size:10px; color:#6b7280; margin:0 0 4px 0;">Sealing Products C.A. &mdash; Sistema de Gesti&oacute;n de Insumos e Inspecciones</p>
+                <p style="font-size:9px; color:#9ca3af; margin:0;">Documento generado autom&aacute;ticamente el ${today}</p>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>`;
 }
