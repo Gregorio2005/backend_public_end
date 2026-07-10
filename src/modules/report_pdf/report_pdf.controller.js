@@ -1,4 +1,5 @@
 const ReportPdfService = require('./report_pdf.service');
+const puppeteer = require('puppeteer');
 
 const ReportPdfController = {
     generatePdf: async (req, res, next) => {
@@ -10,14 +11,8 @@ const ReportPdfController = {
 
             let browser;
             try {
-                browser = await require('puppeteer').launch({
-                    headless: true,
-                    args: [
-                        '--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-gpu'
-                    ]
+                browser = await puppeteer.launch({
+                    headless: 'new',
                 });
                 const page = await browser.newPage();
                 await page.setContent(html, { waitUntil: 'networkidle0' });
