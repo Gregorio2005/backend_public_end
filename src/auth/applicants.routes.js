@@ -5,6 +5,7 @@ const { verifyToken } = require('./auth');
 const upload = require('../middleware/upload');
 const { validateRequest } = require('../middleware/validator');
 const { applicantUpdateSchema } = require('./applicants.schema');
+const { publicLimiter, applicantLimiter } = require('../middleware/rateLimiter');
 
 /**
  * @route GET /api/applicants
@@ -32,7 +33,7 @@ router.get('/:id/cv', verifyToken, ApplicantsController.getCv);
  * @description Crea una nueva postulación con CV opcional.
  * @access Public
  */
-router.post('/', upload.single('cv'), ApplicantsController.createApplicant);
+router.post('/', applicantLimiter, upload.single('cv'), ApplicantsController.createApplicant);
 
 /**
  * @route PUT /api/applicants/:id

@@ -4,12 +4,13 @@ const AuthController = require('./auth.controller');
 const { validateRequest } = require('../middleware/validator');
 const { loginSchema, forgotPasswordSchema, updateProfileSchema, resetPasswordSchema } = require('./auth.schema');
 const { verifyToken } = require('./auth');
+const { loginLimiter } = require('../middleware/rateLimiter');
 
 // Endpoint público para registrar un nuevo usuario
 router.post('/register', AuthController.register);
 
 // Endpoint público para iniciar sesión
-router.post('/login', validateRequest(loginSchema), AuthController.login);
+router.post('/login', loginLimiter, validateRequest(loginSchema), AuthController.login);
 
 // Endpoint protegido para obtener el perfil del usuario actual
 router.get('/me', verifyToken, AuthController.getMe);
