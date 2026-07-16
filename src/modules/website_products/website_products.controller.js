@@ -1,5 +1,6 @@
 const WebsiteProductsService = require('./website_products.service');
 const cloudinary = require('../../config/cloudinary');
+const { clearCache } = require('../../middleware/cache');
 
 const WebsiteProductsController = {
     getActive: async (req, res, next) => {
@@ -63,6 +64,7 @@ const WebsiteProductsController = {
 
             const data = await WebsiteProductsService.create(productData);
             res.status(201).json({ success: true, data, message: 'Producto creado correctamente.' });
+            clearCache('products');
         } catch (error) {
             next(error);
         }
@@ -116,6 +118,7 @@ const WebsiteProductsController = {
 
             const data = await WebsiteProductsService.update(req.params.id, productData);
             res.json({ success: true, data, message: 'Producto actualizado correctamente.' });
+            clearCache('products');
         } catch (error) {
             next(error);
         }
@@ -138,6 +141,7 @@ const WebsiteProductsController = {
 
             await WebsiteProductsService.delete(req.params.id);
             res.json({ success: true, message: 'Producto eliminado correctamente.' });
+            clearCache('products');
         } catch (error) {
             next(error);
         }

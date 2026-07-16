@@ -7,8 +7,9 @@ const { validateRequest } = require('../../middleware/validator');
 const { websiteProductSchema } = require('./website_products.schema');
 const uploadPhoto = require('../../middleware/uploadPhoto');
 const { publicLimiter } = require('../../middleware/rateLimiter');
+const { cacheMiddleware } = require('../../middleware/cache');
 
-router.get('/', publicLimiter, WebsiteProductsController.getActive);
+router.get('/', publicLimiter, cacheMiddleware('products', 14400), WebsiteProductsController.getActive);
 router.get('/all', verifyToken, isAdmin, WebsiteProductsController.getAll);
 router.get('/:id', verifyToken, isAdmin, WebsiteProductsController.getById);
 router.post('/', verifyToken, isAdmin, uploadPhoto.single('image'), validateRequest(websiteProductSchema), WebsiteProductsController.create);

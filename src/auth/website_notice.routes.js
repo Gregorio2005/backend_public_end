@@ -6,13 +6,14 @@ const { isAdmin } = require('../middleware/roleAuth'); // Asumiendo que isAdmin 
 const { validateRequest } = require('../middleware/validator'); // Asumiendo que validator está en middleware/validator.js
 const { createWebsiteNoticeSchema } = require('./website_notice.schema');
 const { publicLimiter } = require('../middleware/rateLimiter');
+const { cacheMiddleware } = require('../middleware/cache');
 
 /**
  * @route POST /api/website-notice
  * @description Crea un nuevo aviso web.
  * @access Private (Admin only)
  */
-router.get('/', publicLimiter, WebsiteNoticeController.getNotices);
+router.get('/', publicLimiter, cacheMiddleware('notices', 14400), WebsiteNoticeController.getNotices);
 
 /**
  * @route GET /api/website-notice/:id

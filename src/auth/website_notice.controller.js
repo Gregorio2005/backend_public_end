@@ -1,4 +1,5 @@
 const WebsiteNoticeModel = require('./website_notice.model');
+const { clearCache } = require('../middleware/cache');
 
 const WebsiteNoticeController = {
     /**
@@ -15,6 +16,7 @@ const WebsiteNoticeController = {
                 message: 'Aviso web creado con éxito.',
                 data: newNotice,
             });
+            clearCache('notices');
         } catch (error) {
             next(error);
         }
@@ -73,6 +75,7 @@ const WebsiteNoticeController = {
                 message: 'Aviso publicado oficialmente en el sitio web.',
                 data: notice,
             });
+            clearCache('notices');
         } catch (error) {
             next(error);
         }
