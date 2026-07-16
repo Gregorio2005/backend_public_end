@@ -54,8 +54,8 @@ const ApplicantsController = {
      */
     getAllApplicants: async (req, res, next) => {
         try {
-            const { page, limit } = req.query;
-            const result = await ApplicantsModel.findAll({ page, limit });
+            const { page, limit, search, status, sort, sortDir } = req.query;
+            const result = await ApplicantsModel.findAll({ page, limit, search, status, sort, sortDir });
             res.status(200).json({
                 success: true,
                 ...result,

@@ -4,8 +4,60 @@ const { paginate } = require('../../utils/pagination');
 const BASE_SELECT = 'SELECT id, "user", name, lastname, ci, email, roles_id, status, created_at FROM public.users';
 
 const UsersModel = {
-    findAll: async (params = {}) => {
-        return await paginate(`${BASE_SELECT} ORDER BY roles_id ASC, id ASC`, [], params);
+    findAll: async ({ page, limit, search, roles_id, status, sort, sortDir } = {}) => {
+        const conditions = [];
+        const params = [];
+
+        if (search) {
+            params.push(`%${search}%`);
+            const idx = params.length;
+            conditions.push(`(
+                name ILIKE $${idx} OR 
+                lastname ILIKE $${idx} OR 
+                "user" ILIKE $${idx} OR 
+                email ILIKE $${idx}
+            )`);
+        }
+
+        if (roles_id) {
+            const ids = roles_id.split(',').map(Number).filter(n => !isNaN(n));
+            if (ids.length > 0) {
+                params.push(ids);
+                conditions.push(`roles_id = ANY($${params.length}::int[])`);
+            }
+        }
+
+        if (status) {
+            const statuses = status.split(',').filter(Boolean);
+            if (statuses.length > 0) {
+                params.push(statuses);
+                conditions.push(`status = ANY($${params.length}::text[])`);
+            }
+        }
+
+        let query = BASE_SELECT;
+        if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(' AND ')}`;
+        }
+
+        const allowedSorts = ['name', 'lastname', 'user', 'roles_id', 'status'];
+        if (allowedSorts.includes(sort)) {
+            const dir = sortDir === 'desc' ? 'DESC' : 'ASC';
+            const col = sort === 'user' ? `"${sort}"` : `"${sort}"`;
+
+            query += ` ORDER BY
+                CASE
+                    WHEN ${col}::text ~ '^[a-zA-Z]' THEN 1
+                    WHEN ${col}::text ~ '^[0-9]' THEN 2
+                    ELSE 3
+                END ASC,
+                ${col} ${dir},
+                id ${dir}`;
+        } else {
+            query += ` ORDER BY roles_id ASC, id ASC`;
+        }
+
+        return await paginate(query, params, { page, limit });
     },
 
     findById: async (id) => {

@@ -7,8 +7,29 @@ const BASE_SELECT = `SELECT id, name, lastname, ci, email, phone, birth_date, ro
                      FROM public.postulantes`;
 
 const ApplicantsModel = {
-    findAll: async (params = {}) => {
+    findAll: async ({ page, limit, search, status, sort, sortDir } = {}) => {
         try {
+            const conditions = [];
+            const params = [];
+
+            if (search) {
+                params.push(`%${search}%`);
+                const idx = params.length;
+                conditions.push(`(
+                    name ILIKE $${idx} OR
+                    lastname ILIKE $${idx} OR
+                    ci ILIKE $${idx}
+                )`);
+            }
+
+            if (status) {
+                const statuses = status.split(',').filter(Boolean);
+                if (statuses.length > 0) {
+                    params.push(statuses);
+                    conditions.push(`status = ANY($${params.length}::text[])`);
+                }
+            }
+
             const statusOrder = `CASE status
                 WHEN 'En revision' THEN 1
                 WHEN 'Pendiente' THEN 2
@@ -17,7 +38,26 @@ const ApplicantsModel = {
                 WHEN 'Rechazado' THEN 5
                 WHEN 'Descartado' THEN 6
                 ELSE 7 END`;
-            return await paginate(`${BASE_SELECT} ORDER BY ${statusOrder} ASC, id ASC`, [], params);
+
+            let query = BASE_SELECT;
+            if (conditions.length > 0) {
+                query += ` WHERE ${conditions.join(' AND ')}`;
+            }
+
+            const allowedSorts = ['name', 'lastname', 'ci', 'status'];
+            if (allowedSorts.includes(sort)) {
+                const dir = sortDir === 'desc' ? 'DESC' : 'ASC';
+                if (sort === 'status') {
+                    query += ` ORDER BY ${statusOrder} ${dir}, id ASC`;
+                } else {
+                    const col = `"${sort}"`;
+                    query += ` ORDER BY ${col} ${dir}, ${statusOrder} ASC, id ASC`;
+                }
+            } else {
+                query += ` ORDER BY ${statusOrder} ASC, id ASC`;
+            }
+
+            return await paginate(query, params, { page, limit });
         } catch (error) {
             throw new Error(`Error al obtener postulantes desde la base de datos: ${error.message}`);
         }
